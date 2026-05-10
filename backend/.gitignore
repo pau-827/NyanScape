@@ -1,0 +1,21 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables (Secrets)
+.env
+.flaskenv
+
+# Database (if using local SQLite for testing)
+*.sqlite3
+*.db
+
+# OS specific files
+.DS_Store
+Thumbs.db
