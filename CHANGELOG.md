@@ -8,9 +8,14 @@ All notable changes to this project will be documented in this file.
 
 ## [2025-05-13]
 
-### Added
-
 - `[Muit]` - Initialized Flask backend with virtual environment (Python 3.11)
 - `[Muit]` - Installed dependencies: flask, flask-cors, supabase, azure-storage-blob, python-dotenv, gunicorn
 - `[Muit]` - Created requirements.txt with pinned dependency versions
 - `[Muit]` - Created .env template for local environment configuration
+
+- `[Muit]` - Created Flask app entry point (app.py) with CORS and blueprint registration
+- `[Muit]` - Added auth routes: signup, login, logout via Supabase Auth
+- `[Muit]` - Added posts routes: get all posts, create post with Azure Blob upload, delete post
+- `[Muit]` - Added likes routes: like, unlike, get like count per post
+- `[Muit]` - Added comments routes: get, add, delete comments per post
+- `[Muit]` - Configured Azure Blob Storage SAS token generation for secure image serving
