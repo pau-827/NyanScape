@@ -25,7 +25,7 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) return <div className="loading">Loading... 🐱</div>
+  if (loading) return <div className="loading">Loading... ^._.^</div>
 
   return (
     <BrowserRouter>
@@ -36,6 +36,9 @@ function App() {
         <Route path="/register" element={!session ? <Register /> : <Navigate to="/" />} />
         <Route path="/profile" element={session ? <Profile session={session} /> : <Navigate to="/login" />} />
       </Routes>
+      <footer>
+        🐱 <span>NyanScape</span> — Made with love for cat lovers everywhere · {new Date().getFullYear()}
+      </footer>
     </BrowserRouter>
   )
 }

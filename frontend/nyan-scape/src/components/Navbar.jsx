@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import nyanLogo from '../assets/nyan.png'
 
 function Navbar({ session }) {
   const navigate = useNavigate()
@@ -11,7 +12,10 @@ function Navbar({ session }) {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-brand">🐱 NyanScape</Link>
+      <Link to="/" className="navbar-brand">
+        <img src={nyanLogo} alt="NyanScape logo" />
+        NyanScape
+      </Link>
       <div className="navbar-links">
         {session ? (
           <>

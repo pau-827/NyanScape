@@ -27,3 +27,7 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Added UploadForm component with image preview
 - `[Muit]` - Connected frontend to Flask API via axios
 - `[Muit]` - Added Supabase auth session management in App.jsx
+
+- `[Muit]` - Redesigned Login and Register pages with split-screen wavy SVG layout
+- `[Muit]` - Updated global theme to purple color scheme (#7c3aed)
+- `[Muit]` - Removed card box constraint, auth layout now full-screen
