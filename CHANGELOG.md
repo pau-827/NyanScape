@@ -19,3 +19,11 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Added likes routes: like, unlike, get like count per post
 - `[Muit]` - Added comments routes: get, add, delete comments per post
 - `[Muit]` - Configured Azure Blob Storage SAS token generation for secure image serving
+
+- `[Panliboton]` - Created Azure Architecture Diagram
+
+- `[Muit]` - Built React frontend with Login, Register, Home, Profile pages
+- `[Muit]` - Added PostCard component with likes and comments
+- `[Muit]` - Added UploadForm component with image preview
+- `[Muit]` - Connected frontend to Flask API via axios
+- `[Muit]` - Added Supabase auth session management in App.jsx
