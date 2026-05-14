@@ -4,6 +4,8 @@ from routes.auth import auth_bp
 from routes.posts import posts_bp
 from routes.likes import likes_bp
 from routes.comments import comments_bp
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)

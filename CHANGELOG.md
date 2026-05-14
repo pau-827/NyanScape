@@ -31,3 +31,8 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Redesigned Login and Register pages with split-screen wavy SVG layout
 - `[Muit]` - Updated global theme to purple color scheme (#7c3aed)
 - `[Muit]` - Removed card box constraint, auth layout now full-screen
+
+- `[Ayelyn]` - Updated and finalized the Azure cloud architecture diagram
+- `[Ayelyn]` - Created and configured the Flask backend structure
+- `[Ayelyn]` - Added Supabase authentication routes for signup and login
+

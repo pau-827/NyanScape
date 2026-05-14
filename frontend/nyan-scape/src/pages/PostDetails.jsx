@@ -1,11 +1,11 @@
 import React from "react";
 
-function Profile() {
+function PostDetails() {
   return (
     <div style={{ padding: "40px" }}>
-      <h1>My Profile 👤</h1>
+      <h1>Post Details 💬</h1>
     </div>
   );
 }
 
-export default Profile;
+export default PostDetails;

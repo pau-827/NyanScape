@@ -1,46 +1,22 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { supabase } from './lib/supabase'
-import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Profile from './pages/Profile'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import Home from "./pages/Home";
+import CreatePost from "./pages/CreatePost";
+import Profile from "./pages/Profile";
+import PostDetails from "./pages/PostDetails";
 
 function App() {
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  if (loading) return <div className="loading">Loading... ^._.^</div>
-
   return (
     <BrowserRouter>
-      <Navbar session={session} />
       <Routes>
-        <Route path="/" element={session ? <Home session={session} /> : <Navigate to="/login" />} />
-        <Route path="/login" element={!session ? <Login /> : <Navigate to="/" />} />
-        <Route path="/register" element={!session ? <Register /> : <Navigate to="/" />} />
-        <Route path="/profile" element={session ? <Profile session={session} /> : <Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/fyp" />} />
+        <Route path="/fyp" element={<Home />} />
+        <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/post/:id" element={<PostDetails />} />
       </Routes>
-      <footer>
-        🐱 <span>NyanScape</span> — Made with love for cat lovers everywhere · {new Date().getFullYear()}
-      </footer>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
