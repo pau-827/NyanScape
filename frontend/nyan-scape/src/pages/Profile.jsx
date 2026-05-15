@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Profile.css";
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
+import cover from "../assets/cover.jpg";
 
 function Profile() {
   const navigate = useNavigate();
@@ -17,7 +22,7 @@ function Profile() {
       id: 1,
       username: "CatLover_23",
       title: "Lazy Sunday ☀️",
-      image: "/cat.webp",
+      image: catImg,
       likes: 256,
       comments: 18,
       bookmarked: false,
@@ -28,7 +33,7 @@ function Profile() {
       id: 2,
       username: "CatLover_23",
       title: "Playtime is the best time! 🧶",
-      image: "/play.jpg",
+      image: playImg,
       likes: 312,
       comments: 24,
       bookmarked: true,
@@ -39,7 +44,7 @@ function Profile() {
       id: 3,
       username: "CatLover_23",
       title: "Watching the world go by 🌎",
-      image: "/luna.webp",
+      image: lunaImg,
       likes: 198,
       comments: 12,
       bookmarked: false,
@@ -142,7 +147,7 @@ function Profile() {
     <div className="profile-page">
       <aside className="profile-sidebar">
         <div className="profile-brand" onClick={() => navigate("/fyp")}>
-          <img src="/logo.png" alt="NyanScape Logo" />
+          <img src={logoImg} alt="NyanScape Logo" />
           <h1>NyanScape</h1>
         </div>
 
@@ -162,7 +167,7 @@ function Profile() {
         </button>
 
         <div className="profile-join-card">
-          <img src="/logo.png" alt="Mascot" />
+          <img src={logoImg}alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
@@ -173,19 +178,19 @@ function Profile() {
         <div className="profile-topbar">
           <input type="text" placeholder="Search cats, users, or tags..." />
           <button onClick={() => alert("Notifications opened!")}>🔔</button>
-          <img src="/cat.webp" alt="User" />
+          <img src={catImg} alt="User" />
           <strong>{profileName}</strong>
         </div>
 
         <section className="profile-card">
           <div className="cover-photo">
-            <img src="/cover.jpg" alt="Cover" />
+            <img src={cover} alt="Cover" />
             <button onClick={handleEditCover}>📷 Edit Cover</button>
           </div>
 
           <div className="profile-info">
             <div className="profile-avatar-wrap">
-              <img src="/cat.webp" alt="Profile" className="profile-avatar" />
+              <img src={catImg} alt="Profile" className="profile-avatar" />
               <button onClick={handleEditAvatar}>📷</button>
             </div>
 
@@ -307,13 +312,13 @@ function Profile() {
 
           <div className="fur-babies">
             <div>
-              <img src="/luna.webp" alt="Luna" />
+              <img src={lunaImg} alt="Luna" />
               <strong>Luna 🐱</strong>
               <p>2 years old</p>
             </div>
 
             <div>
-              <img src="/cat.webp" alt="Milo" />
+              <img src={catImg} alt="Milo" />
               <strong>Milo 🐱</strong>
               <p>1 year old</p>
             </div>

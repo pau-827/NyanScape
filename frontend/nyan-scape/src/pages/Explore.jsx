@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Explore.css";
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
 
 function Explore() {
   const navigate = useNavigate();
@@ -27,7 +31,7 @@ function Explore() {
       time: "2h ago",
       title: "Sunbathing is my cardio ☀️🐱",
       tags: "#CatLife #SunnyDay #NyanScape",
-      image: "/cat.webp",
+      image: catImg,
       likes: 124,
       comments: 18,
       shares: 12,
@@ -38,7 +42,7 @@ function Explore() {
       time: "4h ago",
       title: "Meet Luna! She's always curious about everything!",
       tags: "#MeetLuna #CuriousCat #NyanScape",
-      image: "/luna.webp",
+      image: lunaImg,
       likes: 98,
       comments: 12,
       shares: 7,
@@ -49,7 +53,7 @@ function Explore() {
       time: "6h ago",
       title: "Playtime is the best time! 🧶🐱",
       tags: "#Playtime #HappyCat #NyanScape",
-      image: "/play.jpg",
+      image: playImg,
       likes: 76,
       comments: 9,
       shares: 5,
@@ -60,7 +64,7 @@ function Explore() {
       time: "8h ago",
       title: "Fluffy mood activated 🐱",
       tags: "#FluffyCat #Mood #NyanScape",
-      image: "/cat.webp",
+      image: catImg,
       likes: 62,
       comments: 7,
       shares: 3,
@@ -71,7 +75,7 @@ function Explore() {
       time: "10h ago",
       title: "Watching the world go by 🌎",
       tags: "#WindowView #CatLife #NyanScape",
-      image: "/luna.webp",
+      image: lunaImg,
       likes: 55,
       comments: 6,
       shares: 4,
@@ -82,7 +86,7 @@ function Explore() {
       time: "12h ago",
       title: "Brotherly love 💞",
       tags: "#SiblingCats #Love #NyanScape",
-      image: "/play.jpg",
+      image: playImg,
       likes: 112,
       comments: 14,
       shares: 9,
@@ -160,7 +164,7 @@ function Explore() {
     <div className="explore-page">
       <aside className="explore-sidebar">
         <div className="explore-brand">
-          <img src="/logo.png" alt="NyanScape" />
+          <img src={logoImg} alt="NyanScape" />
           <h1>NyanScape</h1>
         </div>
 
@@ -200,7 +204,7 @@ function Explore() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <button onClick={() => alert("Notifications opened!")}>🔔</button>
-          <img src="/cat.webp" alt="profile" />
+          <img src={catImg} alt="profile" />
         </div>
 
         <section className="explore-header">
@@ -332,7 +336,7 @@ function Explore() {
           <div className="user-row">
             {users.map((user) => (
               <div className="user-card" key={user}>
-                <img src="/cat.webp" alt={user} />
+                <img src={catImg} alt={user} />
                 <strong>{user}</strong>
                 <p>@{user.toLowerCase()}</p>
                 <button onClick={() => toggleFollow(user)}>

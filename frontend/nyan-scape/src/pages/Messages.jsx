@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Messages.css";
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
 
 function Messages() {
   const navigate = useNavigate();
@@ -17,7 +21,7 @@ function Messages() {
       id: 1,
       name: "WhiskerMom",
       handle: "@whiskermom",
-      avatar: "/cat.webp",
+      avatar: catImg,
       status: "Online",
       time: "2m ago",
       unread: 2,
@@ -39,7 +43,7 @@ function Messages() {
         {
           id: 4,
           sender: "me",
-          image: "/luna.webp",
+          image: lunaImg,
           time: "10:32 AM",
         },
         { id: 5, sender: "them", text: "Awww so cute! 😻", time: "10:33 AM" },
@@ -55,7 +59,7 @@ function Messages() {
       id: 2,
       name: "PawHunter",
       handle: "@pawhunter",
-      avatar: "/play.jpg",
+      avatar: playImg,
       status: "Offline",
       time: "15m ago",
       unread: 1,
@@ -69,7 +73,7 @@ function Messages() {
       id: 3,
       name: "MeowMagic",
       handle: "@meowmagic",
-      avatar: "/cat.webp",
+      avatar: catImg,
       status: "Online",
       time: "1h ago",
       unread: 0,
@@ -82,7 +86,7 @@ function Messages() {
       id: 4,
       name: "CatPhotoDaily",
       handle: "@catphotodaily",
-      avatar: "/luna.webp",
+      avatar: lunaImg,
       status: "Offline",
       time: "2h ago",
       unread: 0,
@@ -208,7 +212,7 @@ function Messages() {
     <div className="messages-page">
       <aside className="msg-sidebar">
         <div className="msg-brand" onClick={() => navigate("/fyp")}>
-          <img src="/logo.png" alt="NyanScape" />
+          <img src={logoImg} alt="NyanScape" />
           <h1>NyanScape</h1>
         </div>
 
@@ -226,7 +230,7 @@ function Messages() {
         </button>
 
         <div className="msg-join-card">
-          <img src="/logo.png" alt="Mascot" />
+          <img src={logoImg} alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
@@ -242,7 +246,7 @@ function Messages() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <button onClick={() => navigate("/notifications")}>🔔</button>
-          <img src="/cat.webp" alt="User" />
+          <img src={catImg} alt="User" />
           <strong>CatLover_23</strong>
         </div>
 
@@ -386,7 +390,7 @@ function Messages() {
               </div>
 
               <div className="media-grid">
-                {["/cat.webp", "/luna.webp", "/play.jpg", "/logo.png"].map((img) => (
+                {[catImg, lunaImg, playImg, logoImg].map((img) => (
                   <img
                     key={img}
                     src={img}

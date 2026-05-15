@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Home.css";
-
+import "../App.css";
+import playImg from "../assets/play.jpg";
+import lunaImg from "../assets/luna.webp";
+import Cat from "../assets/cat.webp";
+import logoImg from "../assets/logo.png";
 function Home() {
   const navigate = useNavigate();
 
@@ -14,7 +17,7 @@ function Home() {
       title: "Sunbathing is my cardio ☀️🐱",
       caption: "My cat loves relaxing by the window.",
       hashtags: ["#CatLife", "#SunnyDay", "#NyanScape"],
-      image: "/cat.webp",
+      image: Cat,
       likes: 124,
       comments: 18,
       shares: 12,
@@ -29,7 +32,7 @@ function Home() {
       title: "Meet Luna! 🌙 She loves boxes!",
       caption: "Luna found her new favorite cardboard box.",
       hashtags: ["#MeetLuna", "#CuriousCat", "#NyanScape"],
-      image: "/luna.webp",
+      image: lunaImg,
       likes: 98,
       comments: 12,
       shares: 7,
@@ -44,7 +47,7 @@ function Home() {
       title: "Playtime is the best time! 🧶🐱",
       caption: "A happy kitten enjoying playtime.",
       hashtags: ["#Playtime", "#HappyCat", "#NyanScape"],
-      image: "/play.jpg",
+      image: playImg,
       likes: 76,
       comments: 9,
       shares: 5,
@@ -53,10 +56,7 @@ function Home() {
     },
   ];
 
-  const [posts, setPosts] = useState(() => {
-    const savedPosts = localStorage.getItem("nyanscape_posts");
-    return savedPosts ? JSON.parse(savedPosts) : defaultPosts;
-  });
+const [posts, setPosts] = useState(defaultPosts);
 
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("forYou");
@@ -65,10 +65,6 @@ function Home() {
   const [newCaption, setNewCaption] = useState("");
   const [newImage, setNewImage] = useState(null);
   const [followedUsers, setFollowedUsers] = useState([]);
-
-  useEffect(() => {
-    localStorage.setItem("nyanscape_posts", JSON.stringify(posts));
-  }, [posts]);
 
   function handleLike(id) {
     setPosts(
@@ -190,7 +186,7 @@ function Home() {
     <div className="home-page">
       <aside className="sidebar">
         <div className="brand">
-          <img src="/logo.png" alt="NyanScape Logo" className="logo-img" />
+          <img src={logoImg} alt="NyanScape Logo" className="logo-img" />
           <h1>NyanScape</h1>
         </div>
 
@@ -218,7 +214,7 @@ function Home() {
         </button>
 
         <div className="join-card">
-          <img src="/logo.png" alt="Cat mascot" />
+          <img src={logoImg} alt="Cat mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
@@ -234,7 +230,7 @@ function Home() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <span className="bell">🔔</span>
-          <img src="/cat.webp" alt="User" className="top-avatar" />
+          <img src={Cat} alt="User" className="top-avatar" />
         </div>
 
         <section className="feed-header">

@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Settings.css";
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
 
 function Settings() {
   const navigate = useNavigate();
@@ -108,7 +112,7 @@ function Settings() {
     <div className="settings-page">
       <aside className="settings-sidebar">
         <div className="settings-brand" onClick={() => navigate("/fyp")}>
-          <img src="/logo.png" alt="NyanScape Logo" />
+          <img src={logoImg} alt="NyanScape Logo" />
           <h1>NyanScape</h1>
         </div>
 
@@ -126,7 +130,7 @@ function Settings() {
         </button>
 
         <div className="settings-join-card">
-          <img src="/logo.png" alt="Mascot" />
+          <img src={logoImg} alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>

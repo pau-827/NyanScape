@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Notifications.css";
-
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
 function Notifications() {
   const navigate = useNavigate();
 
@@ -27,8 +30,8 @@ function Notifications() {
       message: "liked your post.",
       detail: "",
       time: "2 minutes ago",
-      avatar: "/cat.webp",
-      image: "/luna.webp",
+      avatar: catImg,
+      image: lunaImg,
       unread: true,
     },
     {
@@ -38,8 +41,8 @@ function Notifications() {
       message: "commented on your post:",
       detail: "So adorable! 😻",
       time: "5 minutes ago",
-      avatar: "/luna.webp",
-      image: "/cat.webp",
+      avatar: lunaImg,
+      image: catImg,
       unread: true,
     },
     {
@@ -49,7 +52,7 @@ function Notifications() {
       message: "started following you.",
       detail: "",
       time: "10 minutes ago",
-      avatar: "/play.jpg",
+      avatar: playImg,
       image: null,
       unread: true,
     },
@@ -60,8 +63,8 @@ function Notifications() {
       message: "shared your post.",
       detail: "",
       time: "15 minutes ago",
-      avatar: "/cat.webp",
-      image: "/play.jpg",
+      avatar:catImg,
+      image: playImg,
       unread: true,
     },
     {
@@ -71,8 +74,8 @@ function Notifications() {
       message: "mentioned you in a comment.",
       detail: "@CatLover_23 check this out!",
       time: "20 minutes ago",
-      avatar: "/luna.webp",
-      image: "/cat.webp",
+      avatar: lunaImg,
+      image: catImg,
       unread: true,
     },
     {
@@ -82,8 +85,8 @@ function Notifications() {
       message: "liked your post.",
       detail: "",
       time: "1 hour ago",
-      avatar: "/play.jpg",
-      image: "/luna.webp",
+      avatar: playImg,
+      image: lunaImg,
       unread: false,
     },
     {
@@ -93,8 +96,8 @@ function Notifications() {
       message: "commented on your post:",
       detail: "What a cutie! ❤️",
       time: "2 hours ago",
-      avatar: "/cat.webp",
-      image: "/play.jpg",
+      avatar: catImg,
+      image: playImg,
       unread: false,
     },
     {
@@ -104,7 +107,7 @@ function Notifications() {
       message: "started following you.",
       detail: "",
       time: "3 hours ago",
-      avatar: "/luna.webp",
+      avatar:lunaImg,
       image: null,
       unread: false,
     },
@@ -115,8 +118,8 @@ function Notifications() {
       message: "liked your comment.",
       detail: "",
       time: "5 hours ago",
-      avatar: "/play.jpg",
-      image: "/cat.webp",
+      avatar: playImg,
+      image: catImg,
       unread: false,
     },
     {
@@ -126,8 +129,8 @@ function Notifications() {
       message: "shared your post.",
       detail: "",
       time: "1 day ago",
-      avatar: "/cat.webp",
-      image: "/luna.webp",
+      avatar: catImg,
+      image: lunaImg,
       unread: false,
     },
   ]);
@@ -235,7 +238,7 @@ function Notifications() {
     <div className="notifications-page">
       <aside className="notif-sidebar">
         <div className="notif-brand" onClick={() => navigate("/fyp")}>
-          <img src="/logo.png" alt="NyanScape Logo" />
+          <img src={logoImg} alt="NyanScape Logo" />
           <h1>NyanScape</h1>
         </div>
 
@@ -255,7 +258,7 @@ function Notifications() {
         </button>
 
         <div className="notif-join-card">
-          <img src="/logo.png" alt="Mascot" />
+          <img src={logoImg} alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
@@ -274,7 +277,7 @@ function Notifications() {
             }}
           />
           <button onClick={() => alert("Notifications refreshed!")}>🔔</button>
-          <img src="/cat.webp" alt="User avatar" />
+          <img src={catImg} alt="User avatar" />
           <strong>CatLover_23</strong>
         </div>
 

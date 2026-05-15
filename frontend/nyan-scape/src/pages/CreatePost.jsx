@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreatePost.css";
+import "../App.css";
+import catImg from "../assets/cat.webp";
+import lunaImg from "../assets/luna.webp";
+import playImg from "../assets/play.jpg";
+import logoImg from "../assets/logo.png";
 
 function CreatePost() {
   const navigate = useNavigate();
@@ -15,19 +19,19 @@ function CreatePost() {
       id: 1,
       title: "My sleepy baby 😴",
       time: "2 hours ago",
-      image: "/cat.webp",
+      image: catImg,
     },
     {
       id: 2,
       title: "Playtime fun! 🧶",
       time: "1 day ago",
-      image: "/play.jpg",
+      image: playImg,
     },
     {
       id: 3,
       title: "Sunbathing ☀️",
       time: "2 days ago",
-      image: "/luna.webp",
+      image:lunaImg,
     },
   ]);
 
@@ -94,7 +98,7 @@ function CreatePost() {
       id: Date.now(),
       title: caption || "Untitled draft",
       time: "Just now",
-      image: imagePreview || "/logo.png",
+      image: imagePreview || logoImg,
     };
 
     setDrafts([newDraft, ...drafts]);
@@ -117,10 +121,9 @@ function CreatePost() {
     <div className="create-page">
       <aside className="create-sidebar">
         <div className="create-brand" onClick={() => navigate("/fyp")}>
-          <img src="/logo.png" alt="NyanScape Logo" />
+          <img src={logoImg} alt="NyanScape Logo" />
           <div>
             <h1>NyanScape</h1>
-            <p>Share. Connect. Meow.</p>
           </div>
         </div>
 
@@ -138,7 +141,7 @@ function CreatePost() {
         <button className="main-create-btn">+ Create Post</button>
 
         <div className="create-join-card">
-          <img src="/logo.png" alt="Mascot" />
+          <img src={logoImg} alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
           <button onClick={() => alert("Invite link copied!")}>
@@ -151,7 +154,7 @@ function CreatePost() {
         <div className="create-topbar">
           <input type="text" placeholder="Search cats, users, or tags..." />
           <button onClick={() => alert("Notifications opened!")}>🔔</button>
-          <img src="/cat.webp" alt="User avatar" />
+          <img src={logoImg} alt="User avatar" />
         </div>
 
         <header className="create-header">
