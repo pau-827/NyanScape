@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { signup } from '../lib/api'
+import { supabase } from '../lib/supabase'
 
 function Register() {
   const [email, setEmail] = useState('')
@@ -15,10 +15,15 @@ function Register() {
     setLoading(true)
     setError('')
     try {
-      await signup({ email, password, username })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } }
+      })
+      if (error) throw error
       navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.error || 'Signup failed')
+      setError(err.message || 'Signup failed')
     } finally {
       setLoading(false)
     }

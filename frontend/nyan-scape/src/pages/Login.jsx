@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { login } from '../lib/api'
+import { supabase } from '../lib/supabase'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -14,10 +14,11 @@ function Login() {
     setLoading(true)
     setError('')
     try {
-      await login({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed')
+      setError(err.message || 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -25,7 +26,6 @@ function Login() {
 
   return (
     <div className="auth-split">
-      {/* Left — wavy side */}
       <div className="auth-left">
         <svg className="auth-left-bg" viewBox="0 0 700 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <rect width="700" height="800" fill="#7c3aed"/>
@@ -47,7 +47,6 @@ function Login() {
         </div>
       </div>
 
-      {/* Right — form side */}
       <div className="auth-right">
         <div className="auth-card">
           <h2><span>Sign in</span> to your<br/>account</h2>

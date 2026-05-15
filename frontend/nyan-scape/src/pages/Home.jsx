@@ -1,183 +1,66 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { getPosts, likePost, unlikePost } from "../lib/api";
 import "../App.css";
-import playImg from "../assets/play.jpg";
-import lunaImg from "../assets/luna.webp";
-import Cat from "../assets/cat.webp";
 import logoImg from "../assets/logo.png";
-function Home() {
+
+function Home({ session }) {
   const navigate = useNavigate();
-
-  const defaultPosts = [
-    {
-      id: 1,
-      username: "WhiskerMom",
-      handle: "@whiskermom",
-      time: "2h ago",
-      title: "Sunbathing is my cardio ☀️🐱",
-      caption: "My cat loves relaxing by the window.",
-      hashtags: ["#CatLife", "#SunnyDay", "#NyanScape"],
-      image: Cat,
-      likes: 124,
-      comments: 18,
-      shares: 12,
-      liked: false,
-      bookmarked: false,
-    },
-    {
-      id: 2,
-      username: "PawHunter",
-      handle: "@pawhunter",
-      time: "4h ago",
-      title: "Meet Luna! 🌙 She loves boxes!",
-      caption: "Luna found her new favorite cardboard box.",
-      hashtags: ["#MeetLuna", "#CuriousCat", "#NyanScape"],
-      image: lunaImg,
-      likes: 98,
-      comments: 12,
-      shares: 7,
-      liked: false,
-      bookmarked: false,
-    },
-    {
-      id: 3,
-      username: "CatLover_23",
-      handle: "@catlover23",
-      time: "6h ago",
-      title: "Playtime is the best time! 🧶🐱",
-      caption: "A happy kitten enjoying playtime.",
-      hashtags: ["#Playtime", "#HappyCat", "#NyanScape"],
-      image: playImg,
-      likes: 76,
-      comments: 9,
-      shares: 5,
-      liked: false,
-      bookmarked: false,
-    },
-  ];
-
-const [posts, setPosts] = useState(defaultPosts);
-
+  const [posts, setPosts] = useState([]);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("forYou");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showCreatePost, setShowCreatePost] = useState(false);
-  const [newCaption, setNewCaption] = useState("");
-  const [newImage, setNewImage] = useState(null);
-  const [followedUsers, setFollowedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [likedPosts, setLikedPosts] = useState({});
 
-  function handleLike(id) {
-    setPosts(
-      posts.map((post) =>
-        post.id === id
-          ? {
-              ...post,
-              liked: !post.liked,
-              likes: post.liked ? post.likes - 1 : post.likes + 1,
-            }
-          : post
-      )
-    );
+  async function fetchPosts() {
+    try {
+      setLoading(true);
+      const res = await getPosts();
+      setPosts(res.data);
+    } catch (err) {
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleBookmark(id) {
-    setPosts(
-      posts.map((post) =>
-        post.id === id
-          ? { ...post, bookmarked: !post.bookmarked }
-          : post
-      )
-    );
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  async function handleLike(postId) {
+    const alreadyLiked = likedPosts[postId];
+    try {
+      if (alreadyLiked) {
+        await unlikePost({ user_id: session.user.id, post_id: postId });
+        setLikedPosts(prev => ({ ...prev, [postId]: false }));
+      } else {
+        await likePost({ user_id: session.user.id, post_id: postId });
+        setLikedPosts(prev => ({ ...prev, [postId]: true }));
+      }
+    } catch (err) {
+      console.error("Like error:", err);
+    }
   }
 
-  function handleShare(id) {
-    const link = `${window.location.origin}/post/${id}`;
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    navigate("/login");
+  }
+
+  function handleShare(postId) {
+    const link = `${window.location.origin}/post/${postId}`;
     navigator.clipboard.writeText(link);
-    setPosts(
-      posts.map((post) =>
-        post.id === id ? { ...post, shares: post.shares + 1 } : post
-      )
-    );
     alert("Post link copied!");
   }
 
-  function handleComment(id) {
-    const comment = prompt("Write your comment:");
-    if (!comment) return;
-
-    setPosts(
-      posts.map((post) =>
-        post.id === id ? { ...post, comments: post.comments + 1 } : post
-      )
-    );
-
-    alert("Comment added!");
-  }
-
-  function handleFollow(username) {
-    if (followedUsers.includes(username)) {
-      setFollowedUsers(followedUsers.filter((user) => user !== username));
-    } else {
-      setFollowedUsers([...followedUsers, username]);
-    }
-  }
-
-  function handleImageUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const imageUrl = URL.createObjectURL(file);
-    setNewImage(imageUrl);
-  }
-
-  function handleCreatePost(e) {
-    e.preventDefault();
-
-    if (!newCaption || !newImage) {
-      alert("Please add a caption and image.");
-      return;
-    }
-
-    const newPost = {
-      id: Date.now(),
-      username: "You",
-      handle: "@you",
-      time: "Just now",
-      title: newCaption,
-      caption: newCaption,
-      hashtags: ["#CatLife", "#NyanScape", "#NewPost"],
-      image: newImage,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      liked: false,
-      bookmarked: false,
-    };
-
-    setPosts([newPost, ...posts]);
-    setNewCaption("");
-    setNewImage(null);
-    setShowCreatePost(false);
-  }
-
   function getFilteredPosts() {
-    let filtered = posts.filter((post) => {
-      const searchText = `${post.title} ${post.caption} ${post.username} ${post.handle} ${post.hashtags.join(
-        " "
-      )}`.toLowerCase();
-
+    return posts.filter((post) => {
+      const searchText = `${post.caption} ${post.profiles?.username}`.toLowerCase();
       return searchText.includes(search.toLowerCase());
     });
-
-    if (activeTab === "latest") {
-      filtered = [...filtered].sort((a, b) => b.id - a.id);
-    }
-
-    if (activeTab === "following") {
-      filtered = filtered.filter((post) => followedUsers.includes(post.username));
-    }
-
-    return filtered;
   }
 
   const filteredPosts = getFilteredPosts();
@@ -192,24 +75,15 @@ const [posts, setPosts] = useState(defaultPosts);
 
         <nav>
           <button className="nav-link active">🏠 FYP</button>
-          <button className="nav-link" onClick={() => navigate("/explore")}>
-            🔍 Explore
-          </button>
-          <button className="nav-link" onClick={() => setShowCreatePost(true)}>
-            ➕ Create Post
-          </button>
-          <button className="nav-link" onClick={() => setActiveTab("bookmarks")}>
-            🔖 Bookmarks
-          </button>
-          <button className="nav-link" onClick={() => navigate("/profile")}>
-            👤 My Profile
-          </button>
+          <button className="nav-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
+          <button className="nav-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
+          <button className="nav-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
           <button className="nav-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
-        <button className="nav-link active" onClick={() => navigate("/messages")}>💬 Messages</button>
+          <button className="nav-link" onClick={() => navigate("/messages")}>💬 Messages</button>
           <button className="nav-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
         </nav>
 
-        <button className="create-btn" onClick={() => setShowCreatePost(true)}>
+        <button className="create-btn" onClick={() => navigate("/create-post")}>
           + Create Post
         </button>
 
@@ -217,7 +91,7 @@ const [posts, setPosts] = useState(defaultPosts);
           <img src={logoImg} alt="Cat mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
+          <button onClick={handleLogout}>Logout</button>
         </div>
       </aside>
 
@@ -225,12 +99,11 @@ const [posts, setPosts] = useState(defaultPosts);
         <div className="top-bar">
           <input
             type="text"
-            placeholder="Search posts, users, or tags..."
+            placeholder="Search posts or users..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <span className="bell">🔔</span>
-          <img src={Cat} alt="User" className="top-avatar" />
         </div>
 
         <section className="feed-header">
@@ -238,91 +111,61 @@ const [posts, setPosts] = useState(defaultPosts);
             <h2>FYP ✨</h2>
             <p>For You, Purrfectly curated cat content 🐾</p>
           </div>
-
           <div className="tabs">
-            <button
-              className={activeTab === "forYou" ? "active-tab" : ""}
-              onClick={() => setActiveTab("forYou")}
-            >
-              For You
-            </button>
-            <button
-              className={activeTab === "following" ? "active-tab" : ""}
-              onClick={() => setActiveTab("following")}
-            >
-              Following
-            </button>
-            <button
-              className={activeTab === "latest" ? "active-tab" : ""}
-              onClick={() => setActiveTab("latest")}
-            >
-              Latest
-            </button>
+            <button className={activeTab === "forYou" ? "active-tab" : ""} onClick={() => setActiveTab("forYou")}>For You</button>
+            <button className={activeTab === "latest" ? "active-tab" : ""} onClick={() => setActiveTab("latest")}>Latest</button>
           </div>
         </section>
 
-        {activeTab === "bookmarks" && (
-          <h3 className="section-label">Saved Posts 🔖</h3>
-        )}
-
-        {filteredPosts.filter((post) =>
-          activeTab === "bookmarks" ? post.bookmarked : true
-        ).length === 0 ? (
+        {loading ? (
+          <div className="empty-state"><h3>Loading posts... 🐱</h3></div>
+        ) : filteredPosts.length === 0 ? (
           <div className="empty-state">
-            <h3>No posts found 🐾</h3>
-            <p>Try another search or create a new cat post.</p>
+            <h3>No posts yet 🐾</h3>
+            <p>Be the first to share a cat moment!</p>
+            <button onClick={() => navigate("/create-post")}>Create Post</button>
           </div>
         ) : (
-          filteredPosts
-            .filter((post) => (activeTab === "bookmarks" ? post.bookmarked : true))
-            .map((post) => (
-              <article className="post-card" key={post.id}>
-                <div className="post-menu">•••</div>
-
-                <div className="post-user">
-                  <img src={post.image} alt={post.username} className="user-avatar" />
-                  <div>
-                    <h3>{post.username}</h3>
-                    <p>
-                      {post.handle} · {post.time}
-                    </p>
-                  </div>
+          filteredPosts.map((post) => (
+            <article className="post-card" key={post.id}>
+              <div className="post-user">
+                <div className="user-avatar-placeholder">🐱</div>
+                <div>
+                  <h3>{post.profiles?.username || "Unknown"}</h3>
+                  <p>{new Date(post.created_at).toLocaleDateString()}</p>
                 </div>
+              </div>
 
-                <h2 className="post-title">{post.title}</h2>
+              <p className="post-title">{post.caption}</p>
 
-                <p className="hashtags">
-                  {post.hashtags.map((tag) => (
-                    <span key={tag}>{tag} </span>
-                  ))}
-                </p>
+              <img
+                src={post.image_url}
+                alt="Cat post"
+                className="post-image"
+                onClick={() => setSelectedImage(post.image_url)}
+              />
 
-                <img
-                  src={post.image}
-                  alt="Cat post"
-                  className="post-image"
-                  onClick={() => setSelectedImage(post.image)}
-                />
-
-                <div className="post-actions">
-                  <button onClick={() => handleLike(post.id)}>
-                    {post.liked ? "❤️" : "🤍"} {post.likes}
-                  </button>
-
-                  <button onClick={() => handleComment(post.id)}>
-                    💬 {post.comments}
-                  </button>
-
-                  <button onClick={() => handleShare(post.id)}>
-                    ↗️ {post.shares}
-                  </button>
-
-                  <button onClick={() => handleBookmark(post.id)}>
-                    {post.bookmarked ? "🔖" : "🔲"}
-                  </button>
-                </div>
-              </article>
-            ))
+              <div className="post-actions">
+                <button onClick={() => handleLike(post.id)}>
+                  {likedPosts[post.id] ? "❤️" : "🤍"}
+                </button>
+                <button onClick={() => handleShare(post.id)}>↗️ Share</button>
+                {session.user.id === post.user_id && (
+                  <button onClick={async () => {
+                    if (window.confirm("Delete this post?")) {
+                      try {
+                        const { deletePost } = await import("../lib/api");
+                        await deletePost(post.id);
+                        fetchPosts();
+                      } catch (err) {
+                        console.error("Delete error:", err);
+                      }
+                    }
+                  }}>🗑️</button>
+                )}
+              </div>
+            </article>
+          ))
         )}
       </main>
 
@@ -333,76 +176,17 @@ const [posts, setPosts] = useState(defaultPosts);
           <p>#CatLife <span>1.8K posts</span></p>
           <p>#NyanScape <span>1.5K posts</span></p>
           <p>#WhiskerWednesday <span>980 posts</span></p>
-          <button>View all trends →</button>
         </div>
-
-        <div className="panel-card">
-          <h3>👥 Suggested Users</h3>
-
-          {["MeowMates", "FluffyPaws", "PurrfectCats"].map((user) => (
-            <div className="suggested-user" key={user}>
-              <span>🐱 {user}</span>
-              <button onClick={() => handleFollow(user)}>
-                {followedUsers.includes(user) ? "Following" : "Follow"}
-              </button>
-            </div>
-          ))}
-
-          <button>View more →</button>
-        </div>
-
         <div className="panel-card quote-card">
           <h3>Daily Purrspiration</h3>
-          <p>“Time spent with cats is never wasted.”</p>
+          <p>"Time spent with cats is never wasted."</p>
           <span>– Sigmund Freud</span>
         </div>
-
-        <div className="panel-card">
-          <h3>Who to Follow</h3>
-
-          {["KittyChronicles", "TheCatDaily", "MeowWorld"].map((user) => (
-            <div className="suggested-user" key={user}>
-              <span>🐾 {user}</span>
-              <button onClick={() => handleFollow(user)}>
-                {followedUsers.includes(user) ? "Following" : "Follow"}
-              </button>
-            </div>
-          ))}
-        </div>
       </aside>
-
-      <button className="floating-paw" onClick={() => setShowCreatePost(true)}>
-        🐾
-      </button>
 
       {selectedImage && (
         <div className="image-modal" onClick={() => setSelectedImage(null)}>
           <img src={selectedImage} alt="Preview" />
-        </div>
-      )}
-
-      {showCreatePost && (
-        <div className="create-modal">
-          <form className="create-box" onSubmit={handleCreatePost}>
-            <h2>Create New Cat Post 🐱</h2>
-
-            <textarea
-              placeholder="Write a caption..."
-              value={newCaption}
-              onChange={(e) => setNewCaption(e.target.value)}
-            />
-
-            <input type="file" accept="image/*" onChange={handleImageUpload} />
-
-            {newImage && <img src={newImage} alt="Preview" className="preview-img" />}
-
-            <div className="modal-actions">
-              <button type="button" onClick={() => setShowCreatePost(false)}>
-                Cancel
-              </button>
-              <button type="submit">Publish Post</button>
-            </div>
-          </form>
         </div>
       )}
     </div>
