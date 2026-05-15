@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
 function Home() {
+  const navigate = useNavigate();
+
   const defaultPosts = [
     {
       id: 1,
@@ -193,7 +196,7 @@ function Home() {
 
         <nav>
           <button className="nav-link active">🏠 FYP</button>
-          <button className="nav-link" onClick={() => alert("Explore page coming soon!")}>
+          <button className="nav-link" onClick={() => navigate("/explore")}>
             🔍 Explore
           </button>
           <button className="nav-link" onClick={() => setShowCreatePost(true)}>
@@ -202,18 +205,12 @@ function Home() {
           <button className="nav-link" onClick={() => setActiveTab("bookmarks")}>
             🔖 Bookmarks
           </button>
-          <button className="nav-link" onClick={() => alert("Profile page coming soon!")}>
+          <button className="nav-link" onClick={() => navigate("/profile")}>
             👤 My Profile
           </button>
-          <button className="nav-link" onClick={() => alert("Notifications coming soon!")}>
-            🔔 Notifications
-          </button>
-          <button className="nav-link" onClick={() => alert("Messages coming soon!")}>
-            💬 Messages
-          </button>
-          <button className="nav-link" onClick={() => alert("Settings coming soon!")}>
-            ⚙️ Settings
-          </button>
+          <button className="nav-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
+        <button className="nav-link active" onClick={() => navigate("/messages")}>💬 Messages</button>
+          <button className="nav-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
         </nav>
 
         <button className="create-btn" onClick={() => setShowCreatePost(true)}>
@@ -369,7 +366,7 @@ function Home() {
 
           {["KittyChronicles", "TheCatDaily", "MeowWorld"].map((user) => (
             <div className="suggested-user" key={user}>
-              <span>+{user}</span>
+              <span>🐾 {user}</span>
               <button onClick={() => handleFollow(user)}>
                 {followedUsers.includes(user) ? "Following" : "Follow"}
               </button>

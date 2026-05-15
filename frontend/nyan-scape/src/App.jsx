@@ -3,7 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
-import PostDetails from "./pages/PostDetails";
+import Settings from "./pages/Settings";
+import Explore from "./pages/Explore"; 
+import Notifications from "./pages/Notifications";
+import Messages from "./pages/Messages";
+
 
 function App() {
   return (
@@ -13,7 +17,11 @@ function App() {
         <Route path="/fyp" element={<Home />} />
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/post/:id" element={<PostDetails />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/messages" element={<Messages />} /> 
+        
       </Routes>
     </BrowserRouter>
   );
