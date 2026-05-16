@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
 import catImg from "../assets/cat.webp";
 import lunaImg from "../assets/luna.webp";
 import playImg from "../assets/play.jpg";
@@ -121,22 +122,22 @@ function Explore() {
       );
     }
 
+    if (activeTab === "bookmarks") {
+      result = result.filter((post) => savedPosts.includes(post.id));
+    }
+
     return result;
-  }, [search, activeTab]);
+  }, [search, activeTab, savedPosts]);
 
   function toggleLike(id) {
     setLikedPosts((prev) =>
-      prev.includes(id)
-        ? prev.filter((postId) => postId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]
     );
   }
 
   function toggleSave(id) {
     setSavedPosts((prev) =>
-      prev.includes(id)
-        ? prev.filter((postId) => postId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]
     );
   }
 
@@ -147,16 +148,12 @@ function Explore() {
 
   function commentPost() {
     const comment = prompt("Write your comment:");
-    if (comment) {
-      alert("Comment added!");
-    }
+    if (comment) alert("Comment added!");
   }
 
   function toggleFollow(user) {
     setFollowedUsers((prev) =>
-      prev.includes(user)
-        ? prev.filter((name) => name !== user)
-        : [...prev, user]
+      prev.includes(user) ? prev.filter((name) => name !== user) : [...prev, user]
     );
   }
 
@@ -168,30 +165,38 @@ function Explore() {
           <h1>NyanScape</h1>
         </div>
 
-        <button onClick={() => navigate("/fyp")}>🏠 FYP</button>
-        <button className="active">🔍 Explore</button>
-        <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button onClick={() => alert(`Saved posts: ${savedPosts.length}`)}>
-          🔖 Bookmarks
-        </button>
-        <button onClick={() => navigate("/profile")}>👤 My Profile</button>
-        <button onClick={() => alert("You have 3 notifications!")}>
-          🔔 Notifications
-        </button>
-        <button onClick={() => alert("Messages coming soon!")}>💬 Messages</button>
-        <button onClick={() => alert("Settings coming soon!")}>⚙️ Settings</button>
+        <nav>
+          <button className="nav-link" onClick={() => navigate("/fyp")}>
+            🏠 FYP
+          </button>
+          <button className="nav-link active">🔍 Explore</button>
+          <button className="nav-link" onClick={() => navigate("/create-post")}>
+            ➕ Create Post
+          </button>
+          <button className="nav-link" onClick={() => setActiveTab("bookmarks")}>
+            🔖 Bookmarks
+          </button>
+          <button className="nav-link" onClick={() => navigate("/profile")}>
+            👤 My Profile
+          </button>
+          <button className="nav-link" onClick={() => navigate("/notif")}>🔔 Notifcations</button>
+          <button className="nav-link" onClick={() => navigate("/messages")}>
+            💬 Messages
+          </button>
+          <button className="nav-link" onClick={() => navigate("/settings")}>
+            ⚙️ Settings
+          </button>
+        </nav>
 
         <button className="create-post-btn" onClick={() => navigate("/create-post")}>
           + Create Post
         </button>
 
         <div className="join-box">
-          <img src="/logo.png" alt="Cat mascot" />
+          <img src={logoImg} alt="Cat mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>
-            Invite Friends
-          </button>
+          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
         </div>
       </aside>
 
@@ -203,7 +208,7 @@ function Explore() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button onClick={() => alert("Notifications opened!")}>🔔</button>
+          <button onClick={() => navigate("/notif")}>🔔</button>
           <img src={catImg} alt="profile" />
         </div>
 
@@ -263,7 +268,7 @@ function Explore() {
 
         <section className="popular-posts">
           <div className="section-title">
-            <h3>Popular Posts</h3>
+            <h3>{activeTab === "bookmarks" ? "Saved Posts" : "Popular Posts"}</h3>
             <button onClick={() => setActiveTab("trending")}>See all →</button>
           </div>
 
@@ -301,9 +306,7 @@ function Explore() {
                       {likedPosts.includes(post.id) ? post.likes + 1 : post.likes}
                     </button>
                     <button onClick={commentPost}>💬 {post.comments}</button>
-                    <button onClick={() => sharePost(post.id)}>
-                      ↗️ {post.shares}
-                    </button>
+                    <button onClick={() => sharePost(post.id)}>↗️ {post.shares}</button>
                   </div>
                 </article>
               ))}
@@ -313,7 +316,6 @@ function Explore() {
 
         <section className="category-box">
           <h3>Explore by Categories</h3>
-
           <div className="category-row">
             {["Cute Cats", "Funny Cats", "Sleepy Cats", "Kittens", "Cat Photography"].map(
               (category) => (
@@ -328,9 +330,7 @@ function Explore() {
         <section className="suggested-bottom">
           <div className="section-title">
             <h3>Suggested Users</h3>
-            <button onClick={() => alert("Showing all suggested users!")}>
-              See all →
-            </button>
+            <button onClick={() => alert("Showing all suggested users!")}>See all →</button>
           </div>
 
           <div className="user-row">
@@ -375,17 +375,6 @@ function Explore() {
           <h3>Daily Purrspiration</h3>
           <p>“Time spent with cats is never wasted.”</p>
           <span>– Sigmund Freud</span>
-        </div>
-
-        <div className="right-card">
-          <h3>Popular Searches</h3>
-          {["funny cats", "cute kittens", "black cat", "cat videos", "sleepy cats"].map(
-            (item) => (
-              <p key={item} onClick={() => setSearch(item)}>
-                🔍 {item}
-              </p>
-            )
-          )}
         </div>
       </aside>
 

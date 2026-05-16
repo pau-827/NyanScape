@@ -22,118 +22,43 @@ function Notifications() {
     shares: true,
   });
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "likes",
-      user: "WhiskerMom",
-      message: "liked your post.",
-      detail: "",
-      time: "2 minutes ago",
-      avatar: catImg,
-      image: lunaImg,
-      unread: true,
-    },
-    {
-      id: 2,
-      type: "comments",
-      user: "PawHunter",
-      message: "commented on your post:",
-      detail: "So adorable! 😻",
-      time: "5 minutes ago",
-      avatar: lunaImg,
-      image: catImg,
-      unread: true,
-    },
-    {
-      id: 3,
-      type: "follows",
-      user: "MeowMagic",
-      message: "started following you.",
-      detail: "",
-      time: "10 minutes ago",
-      avatar: playImg,
-      image: null,
-      unread: true,
-    },
-    {
-      id: 4,
-      type: "shares",
-      user: "PurrfectShots",
-      message: "shared your post.",
-      detail: "",
-      time: "15 minutes ago",
-      avatar:catImg,
-      image: playImg,
-      unread: true,
-    },
-    {
-      id: 5,
-      type: "mentions",
-      user: "CatLover_23",
-      message: "mentioned you in a comment.",
-      detail: "@CatLover_23 check this out!",
-      time: "20 minutes ago",
-      avatar: lunaImg,
-      image: catImg,
-      unread: true,
-    },
-    {
-      id: 6,
-      type: "likes",
-      user: "FluffyPaws",
-      message: "liked your post.",
-      detail: "",
-      time: "1 hour ago",
-      avatar: playImg,
-      image: lunaImg,
-      unread: false,
-    },
-    {
-      id: 7,
-      type: "comments",
-      user: "TheCatDaily",
-      message: "commented on your post:",
-      detail: "What a cutie! ❤️",
-      time: "2 hours ago",
-      avatar: catImg,
-      image: playImg,
-      unread: false,
-    },
-    {
-      id: 8,
-      type: "follows",
-      user: "MeowWorld",
-      message: "started following you.",
-      detail: "",
-      time: "3 hours ago",
-      avatar:lunaImg,
-      image: null,
-      unread: false,
-    },
-    {
-      id: 9,
-      type: "likes",
-      user: "KittyChronicles",
-      message: "liked your comment.",
-      detail: "",
-      time: "5 hours ago",
-      avatar: playImg,
-      image: catImg,
-      unread: false,
-    },
-    {
-      id: 10,
-      type: "shares",
-      user: "CatLover_23",
-      message: "shared your post.",
-      detail: "",
-      time: "1 day ago",
-      avatar: catImg,
-      image: lunaImg,
-      unread: false,
-    },
-  ]);
+  const defaultNotifications = [
+  {
+    id: 1,
+    type: "likes",
+    user: "WhiskerMom",
+    message: "liked your post.",
+    detail: "",
+    time: "2 minutes ago",
+    avatar: catImg,
+    image: lunaImg,
+    unread: true,
+  },
+  {
+    id: 2,
+    type: "comments",
+    user: "PawHunter",
+    message: "commented on your post:",
+    detail: "So adorable!",
+    time: "5 minutes ago",
+    avatar: lunaImg,
+    image: catImg,
+    unread: true,
+  },
+];
+
+function getStoredNotifications() {
+  try {
+    return JSON.parse(localStorage.getItem("nyanscape_notifications")) || [];
+  } catch {
+    return [];
+  }
+}
+
+const [notifications, setNotifications] = useState(() => [
+  ...getStoredNotifications(),
+  ...defaultNotifications,
+]);
 
   const filters = [
     { key: "all", label: "All", icon: "🔔" },
@@ -175,29 +100,46 @@ function Notifications() {
     shares: notifications.filter((item) => item.type === "shares").length,
   };
 
-  function markAllAsRead() {
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        unread: false,
-      }))
-    );
-  }
+function saveNotifications(updatedNotifications) {
+  setNotifications(updatedNotifications);
 
-  function markOneAsRead(id) {
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id === id ? { ...notification, unread: false } : notification
-      )
-    );
-  }
+  const customOnly = updatedNotifications.filter(
+    (item) => Number(item.id) > 1000
+  );
 
-  function deleteNotification(id) {
-    const confirmDelete = window.confirm("Remove this notification?");
-    if (!confirmDelete) return;
+  localStorage.setItem(
+    "nyanscape_notifications",
+    JSON.stringify(customOnly)
+  );
+}
 
-    setNotifications(notifications.filter((notification) => notification.id !== id));
-  }
+function markAllAsRead() {
+  const updatedNotifications = notifications.map((notification) => ({
+    ...notification,
+    unread: false,
+  }));
+
+  saveNotifications(updatedNotifications);
+}
+
+function markOneAsRead(id) {
+  const updatedNotifications = notifications.map((notification) =>
+    notification.id === id ? { ...notification, unread: false } : notification
+  );
+
+  saveNotifications(updatedNotifications);
+}
+
+function deleteNotification(id) {
+  const confirmDelete = window.confirm("Remove this notification?");
+  if (!confirmDelete) return;
+
+  const updatedNotifications = notifications.filter(
+    (notification) => notification.id !== id
+  );
+
+  saveNotifications(updatedNotifications);
+}
 
   function followBack(user) {
     if (followedUsers.includes(user)) {
@@ -247,11 +189,9 @@ function Notifications() {
         <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
         <button onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
         <button onClick={() => navigate("/profile")}>👤 My Profile</button>
-        <button className="active">
-          🔔 Notifications <span>{notifications.filter((item) => item.unread).length}</span>
-        </button>
-        <button onClick={() => alert("Messages coming soon!")}>💬 Messages</button>
-        <button onClick={() => alert("Settings coming soon!")}>⚙️ Settings</button>
+        <button className="active">🔔 Notifications</button>
+        <button onClick={() => navigate("/messages")}>💬 Messages</button>
+        <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
 
         <button className="invite-btn" onClick={() => alert("Invite link copied!")}>
           🐾 Invite Friends

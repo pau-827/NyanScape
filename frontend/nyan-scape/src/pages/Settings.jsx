@@ -121,7 +121,7 @@ function Settings() {
         <button className="nav-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
         <button className="nav-link" onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
         <button className="nav-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
-        <button className="nav-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
+        <button className="nav-link" onClick={() => navigate("/notif")}>🔔 Notifications</button>
         <button className="nav-link" onClick={() => navigate("/messages")}>💬 Messages</button>
         <button className="nav-link active">⚙️ Settings</button>
 

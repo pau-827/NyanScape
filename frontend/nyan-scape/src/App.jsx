@@ -1,35 +1,32 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Home from "./pages/Home";
+import Explore from "./pages/Explore";
 import CreatePost from "./pages/CreatePost";
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Explore from "./pages/Explore";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
-
-import "./App.css";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Redirect */}
-        <Route path="/" element={<Navigate to="/fyp" replace />} />
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Register />} />
+      <Route path="/fyp" element={<Home />} />
+      <Route path="/explore" element={<Explore />} />
+      <Route path="/create-post" element={<CreatePost />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/saved" element={<Profile />} />
+      <Route path="/notif" element={<Notifications />} />
+      <Route path="/messages" element={<Messages />} />
+      <Route path="/settings" element={<Settings />} />
 
-        {/* Main Pages */}
-        <Route path="/fyp" element={<Home />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/create-post" element={<CreatePost />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/settings" element={<Settings />} />
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/fyp" replace />} />
-      </Routes>
-    </BrowserRouter>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

@@ -221,9 +221,11 @@ function Messages() {
         <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
         <button onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
         <button onClick={() => navigate("/profile")}>👤 My Profile</button>
-        <button onClick={() => navigate("/notifications")}>🔔 Notifications</button>
+        <button onClick={() => navigate("/notif")}>🔔 Notifications</button>
         <button className="active">💬 Messages</button>
-        <button onClick={() => alert("Settings coming soon!")}>⚙️ Settings</button>
+        <button onClick={() => navigate("/settings")}>
+  ⚙️ Settings
+</button>
 
         <button className="new-message-btn" onClick={startNewMessage}>
           + New Message
