@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-import { getPosts, likePost, unlikePost, getLikes, getComments, addComment } from "../lib/api";
+import { getPosts, likePost, unlikePost, getLikes, getComments, addComment, deletePost } from "../lib/api";
+import Sidebar from "../components/Sidebar";
 import "../App.css";
-import logoImg from "../assets/logo.png";
 
 function Home({ session }) {
   const navigate = useNavigate();
@@ -23,8 +22,6 @@ function Home({ session }) {
       setLoading(true);
       const res = await getPosts();
       setPosts(res.data);
-
-      // Fetch like counts for all posts
       const likeData = {};
       await Promise.all(res.data.map(async (post) => {
         try {
@@ -79,9 +76,12 @@ function Home({ session }) {
     } catch (err) { console.error("Comment error:", err); }
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    navigate("/login");
+  async function handleDelete(postId) {
+    if (!window.confirm("Delete this post?")) return;
+    try {
+      await deletePost(postId);
+      fetchPosts();
+    } catch (err) { console.error("Delete error:", err); }
   }
 
   function handleShare(postId) {
@@ -94,34 +94,12 @@ function Home({ session }) {
   );
 
   return (
-    <div className="home-page">
-      <aside className="sidebar unified-sidebar">
-        <div className="sidebar-brand" onClick={() => navigate("/fyp")}>
-          <img src={logoImg} alt="NyanScape Logo" className="sidebar-logo" />
-          <h1 className="sidebar-title">NyanScape</h1>
-        </div>
-        <nav className="sidebar-nav">
-          <button className="sidebar-link active" onClick={() => navigate("/fyp")}>🏠 FYP</button>
-          <button className="sidebar-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
-          <button className="sidebar-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
-          <button className="sidebar-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
-          <button className="sidebar-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
-          <button className="sidebar-link" onClick={() => navigate("/messages")}>💬 Messages</button>
-          <button className="sidebar-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
-        </nav>
-        <button className="sidebar-create-btn" onClick={() => navigate("/create-post")}>+ Create Post</button>
-        <div className="sidebar-card">
-          <img src={logoImg} alt="Cat mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      </aside>
-
-      <main className="feed">
+    <div className="page-layout">
+      <Sidebar />
+      <main className="page-main feed">
         <div className="top-bar">
-          <input type="text" placeholder="Search posts or users..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <span className="bell">🔔</span>
+          <input type="text" placeholder="Search posts or users..." value={search}
+            onChange={(e) => setSearch(e.target.value)} />
         </div>
 
         <section className="feed-header">
@@ -153,16 +131,9 @@ function Home({ session }) {
                   <p>{new Date(post.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
-
               <p className="post-title">{post.caption}</p>
-
-              <img
-                src={post.image_url}
-                alt="Cat post"
-                className="post-image"
-                onClick={() => setSelectedImage(post.image_url)}
-              />
-
+              <img src={post.image_url} alt="Cat post" className="post-image"
+                onClick={() => setSelectedImage(post.image_url)} />
               <div className="post-actions">
                 <button onClick={() => handleLike(post.id)}>
                   {likedPosts[post.id] ? "❤️" : "🤍"} {likeCounts[post.id] || 0}
@@ -172,18 +143,9 @@ function Home({ session }) {
                 </button>
                 <button onClick={() => handleShare(post.id)}>↗️ Share</button>
                 {session.user.id === post.user_id && (
-                  <button onClick={async () => {
-                    if (window.confirm("Delete this post?")) {
-                      try {
-                        const { deletePost } = await import("../lib/api");
-                        await deletePost(post.id);
-                        fetchPosts();
-                      } catch (err) { console.error("Delete error:", err); }
-                    }
-                  }}>🗑️</button>
+                  <button onClick={() => handleDelete(post.id)}>🗑️</button>
                 )}
               </div>
-
               {showComments[post.id] && (
                 <div className="comments">
                   {(comments[post.id] || []).map((c) => (
@@ -192,13 +154,10 @@ function Home({ session }) {
                     </div>
                   ))}
                   <div className="comment-input">
-                    <input
-                      type="text"
-                      placeholder="Add a comment..."
+                    <input type="text" placeholder="Add a comment..."
                       value={commentInputs[post.id] || ""}
                       onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleAddComment(post.id); }}
-                    />
+                      onKeyDown={(e) => { if (e.key === "Enter") handleAddComment(post.id); }} />
                     <button onClick={() => handleAddComment(post.id)}>Post</button>
                   </div>
                 </div>
@@ -207,21 +166,6 @@ function Home({ session }) {
           ))
         )}
       </main>
-
-      <aside className="right-panel">
-        <div className="panel-card">
-          <h3>📈 Trending Tags</h3>
-          <p>#Caturday <span>2.1K posts</span></p>
-          <p>#CatLife <span>1.8K posts</span></p>
-          <p>#NyanScape <span>1.5K posts</span></p>
-          <p>#WhiskerWednesday <span>980 posts</span></p>
-        </div>
-        <div className="panel-card quote-card">
-          <h3>Daily Purrspiration</h3>
-          <p>"Time spent with cats is never wasted."</p>
-          <span>– Sigmund Freud</span>
-        </div>
-      </aside>
 
       {selectedImage && (
         <div className="image-modal" onClick={() => setSelectedImage(null)}>

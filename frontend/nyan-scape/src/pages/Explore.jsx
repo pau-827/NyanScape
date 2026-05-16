@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getPosts, likePost, unlikePost } from "../lib/api";
+import Sidebar from "../components/Sidebar";
 import "../App.css";
-import logoImg from "../assets/logo.png";
 
 function Explore({ session }) {
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("forYou");
   const [selectedImage, setSelectedImage] = useState(null);
@@ -42,14 +40,11 @@ function Explore({ session }) {
     try {
       if (alreadyLiked) {
         await unlikePost({ user_id: session.user.id, post_id: postId });
-        setLikedPosts((prev) => ({ ...prev, [postId]: false }));
       } else {
         await likePost({ user_id: session.user.id, post_id: postId });
-        setLikedPosts((prev) => ({ ...prev, [postId]: true }));
       }
-    } catch (err) {
-      console.error("Like error:", err);
-    }
+      setLikedPosts(prev => ({ ...prev, [postId]: !alreadyLiked }));
+    } catch (err) { console.error("Like error:", err); }
   }
 
   function sharePost(id) {
@@ -67,39 +62,15 @@ function Explore({ session }) {
   }, [search, activeTab, posts]);
 
   return (
-    <div className="explore-page">
-      <aside className="explore-sidebar">
-        <div className="explore-brand">
-          <img src={logoImg} alt="NyanScape" />
-          <h1>NyanScape</h1>
-        </div>
-        <button onClick={() => navigate("/fyp")}>🏠 FYP</button>
-        <button className="active">🔍 Explore</button>
-        <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button onClick={() => navigate("/profile")}>👤 My Profile</button>
-        <button onClick={() => navigate("/notifications")}>🔔 Notifications</button>
-        <button onClick={() => navigate("/messages")}>💬 Messages</button>
-        <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
-        <button className="create-post-btn" onClick={() => navigate("/create-post")}>+ Create Post</button>
-        <div className="join-box">
-          <img src={logoImg} alt="Cat mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-        </div>
-      </aside>
-
-      <main className="explore-main">
-        <div className="explore-search">
-          <input
-            type="text"
-            placeholder="Search posts, users, or tags..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button onClick={() => navigate("/notifications")}>🔔</button>
+    <div className="page-layout">
+      <Sidebar />
+      <main className="page-main">
+        <div className="page-topbar">
+          <input type="text" placeholder="Search posts, users, or tags..."
+            value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <section className="explore-header">
+        <section className="page-header">
           <h2>Explore ✨</h2>
           <p>Discover trending cats, popular posts, and new friends 🐾</p>
           <div className="explore-tabs">
@@ -109,10 +80,8 @@ function Explore({ session }) {
           </div>
         </section>
 
-        <section className="hashtag-box">
-          <div className="section-title">
-            <h3>Trending Hashtags</h3>
-          </div>
+        <section className="content-card">
+          <h3>Trending Hashtags</h3>
           <div className="hashtag-row">
             {hashtags.map((item) => (
               <button key={item.tag} onClick={() => setSearch(item.tag)}>
@@ -123,17 +92,12 @@ function Explore({ session }) {
           </div>
         </section>
 
-        <section className="popular-posts">
-          <div className="section-title">
-            <h3>Posts</h3>
-          </div>
+        <section className="content-card">
+          <h3>Posts</h3>
           {loading ? (
             <div className="empty-explore"><h3>Loading... 🐱</h3></div>
           ) : filteredPosts.length === 0 ? (
-            <div className="empty-explore">
-              <h3>No results found 🐾</h3>
-              <p>Try searching another cat, user, or hashtag.</p>
-            </div>
+            <div className="empty-explore"><h3>No results found 🐾</h3></div>
           ) : (
             <div className="explore-grid">
               {filteredPosts.map((post) => (
@@ -144,11 +108,8 @@ function Explore({ session }) {
                       <p>{new Date(post.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <img
-                    src={post.image_url}
-                    alt={post.caption}
-                    onClick={() => setSelectedImage(post.image_url)}
-                  />
+                  <img src={post.image_url} alt={post.caption}
+                    onClick={() => setSelectedImage(post.image_url)} />
                   <h4>{post.caption}</h4>
                   <div className="card-actions">
                     <button onClick={() => toggleLike(post.id)}>
@@ -162,10 +123,8 @@ function Explore({ session }) {
           )}
         </section>
 
-        <section className="suggested-bottom">
-          <div className="section-title">
-            <h3>Suggested Users</h3>
-          </div>
+        <section className="content-card">
+          <h3>Suggested Users</h3>
           <div className="user-row">
             {suggestedUsers.map((user) => (
               <div className="user-card" key={user}>
@@ -176,37 +135,13 @@ function Explore({ session }) {
             ))}
           </div>
         </section>
+
+        {selectedImage && (
+          <div className="image-preview" onClick={() => setSelectedImage(null)}>
+            <img src={selectedImage} alt="Preview" />
+          </div>
+        )}
       </main>
-
-      <aside className="explore-right">
-        <div className="right-card">
-          <h3>🐾 Trending Tags</h3>
-          {hashtags.map((item) => (
-            <p key={item.tag} onClick={() => setSearch(item.tag)} style={{ cursor: "pointer" }}>
-              {item.tag} <span>{item.count}</span>
-            </p>
-          ))}
-        </div>
-        <div className="right-card quote">
-          <h3>Daily Purrspiration</h3>
-          <p>"Time spent with cats is never wasted."</p>
-          <span>– Sigmund Freud</span>
-        </div>
-        <div className="right-card">
-          <h3>Popular Searches</h3>
-          {["funny cats", "cute kittens", "black cat", "sleepy cats"].map((item) => (
-            <p key={item} onClick={() => setSearch(item)} style={{ cursor: "pointer" }}>🔍 {item}</p>
-          ))}
-        </div>
-      </aside>
-
-      <button className="floating-paw" onClick={() => navigate("/create-post")}>🐾</button>
-
-      {selectedImage && (
-        <div className="image-preview" onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Preview" />
-        </div>
-      )}
     </div>
   );
 }

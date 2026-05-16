@@ -112,3 +112,6 @@ All notable changes to this project will be documented in this file.
 
 - `[Muit]` - Added Comment button and function and connected it and like to backend
  
+ ### Changed
+
+- `[Muit]` - Extracted and removed the side navigation bar from all pages and modified a one for all
