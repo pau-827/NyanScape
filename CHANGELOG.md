@@ -16,16 +16,14 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Installed dependencies: flask, flask-cors, supabase, azure-storage-blob, python-dotenv, gunicorn
 - `[Muit]` - Created requirements.txt with pinned dependency versions
 - `[Muit]` - Created .env template for local environment configuration
-
+- `[Sanglay]` - Listed feature and pages to apply in the project
 - `[Muit]` - Created Flask app entry point (app.py) with CORS and blueprint registration
 - `[Muit]` - Added auth routes: signup, login, logout via Supabase Auth
 - `[Muit]` - Added posts routes: get all posts, create post with Azure Blob upload, delete post
 - `[Muit]` - Added likes routes: like, unlike, get like count per post
 - `[Muit]` - Added comments routes: get, add, delete comments per post
 - `[Muit]` - Configured Azure Blob Storage SAS token generation for secure image serving
-
 - `[Panliboton]` - Created Azure Architecture Diagram
-
 - `[Muit]` - Built React frontend with Login, Register, Home, Profile pages
 - `[Muit]` - Added PostCard component with likes and comments
 - `[Muit]` - Added UploadForm component with image preview
@@ -34,8 +32,10 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- `[Sanglay]` - Adjusted Azure Architecture Diagram by adding Supabase SQL
 - `[Muit]` - Redesigned Login and Register pages with split-screen wavy SVG layout
-- `[Muit]` - Updated global theme to purple color scheme (#7c3aed)
+- `[Muit]` - Updated global theme to purple color scheme
+- `[Panliboton]` - Finalized Azure Architecture Diagram
 
 ### Removed
 
@@ -54,8 +54,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `[Sanglay]` - Created system design plan and reference
 - `[Panliboton]` - Created logo for the system
-- `[Panliboton]` - Creatied pages needed for the system
+- `[Panliboton]` - Created pages needed for the system
 
 ### Fixed
 
@@ -74,6 +75,7 @@ All notable changes to this project will be documented in this file.
 - `[Panliboton]` - Created the Notification page UI
 - `[Panliboton]` - Created the Message page UI 
 - `[Panliboton]` - Created the Settings page UI
+- `[Sanglay]` - Tested and documented existing errors in the new pages
 
 ### Changed
 
@@ -87,9 +89,10 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- `[Muit]` - Used Supabase client directly to fixe auth pages' route
+- `[Muit]` - Used Supabase client directly to fix auth pages' route
 - `[Muit]` - Connected Home and Createpost to backend
 - `[Muit]` - Connected Profile, Explore, Settings to real Supabase and backend data
+- `[Panliboton]` - Fix some minor features in every pages 
 
 ### Added
 
@@ -102,6 +105,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 - `[Muit]` - Removed duplicate Azure workflow file
+- `[Sanglay]` - Removed Bookmark page UI that has no function
 
 ### Fixed
 
@@ -111,20 +115,33 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `[Muit]` - Added Comment button and function and connected it and like to backend
+- `[Sanglay]` - Calculate cost estimate report with Microsoft Azure Pricing Calculator and fetched the monthly cost
  
- ### Changed
+ ### Removed
 
 - `[Muit]` - Extracted and removed the side navigation bar from all pages and modified a one for all
 
 ### Added
 
+- `[Sanglay]` - Documented and listed the system's conclusion and recommendations so far
+- `[Sanglay]` - Listed down all the features applied and to be implemented
 - `[Muit]` - Created README markdown file for the whole project
 - `[Muit]` - Added more deployment process screenshots
+- `[Sanglay]` - Created deployment instructions in README
 - `[Muit]` - Added deployment instructions in README
-
 - `[Sanglay]` - Initial Report Documentation of Cost Estimate
 
 ### Changed
 
 - `[Panliboton]` - Updated Cost Estimate report
 - `[Muit]` - Finalized Cost Estimate report
+
+## [2026-05-17]
+
+### Added
+
+- `[Muit]` - Added profile picture upload to Azure
+
+### Fixed
+
+- `[Muit]` - Fixed profile bio saving issues to Supabase
