@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { getPosts, likePost, unlikePost } from "../lib/api";
+import { getPosts, likePost, unlikePost, getLikes, getComments, addComment } from "../lib/api";
 import "../App.css";
 import logoImg from "../assets/logo.png";
 
@@ -13,12 +13,26 @@ function Home({ session }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [likedPosts, setLikedPosts] = useState({});
+  const [likeCounts, setLikeCounts] = useState({});
+  const [comments, setComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
+  const [showComments, setShowComments] = useState({});
 
   async function fetchPosts() {
     try {
       setLoading(true);
       const res = await getPosts();
       setPosts(res.data);
+
+      // Fetch like counts for all posts
+      const likeData = {};
+      await Promise.all(res.data.map(async (post) => {
+        try {
+          const r = await getLikes(post.id);
+          likeData[post.id] = r.data.likes || 0;
+        } catch { likeData[post.id] = 0; }
+      }));
+      setLikeCounts(likeData);
     } catch (err) {
       console.error("Failed to fetch posts:", err);
     } finally {
@@ -26,9 +40,7 @@ function Home({ session }) {
     }
   }
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  useEffect(() => { fetchPosts(); }, []);
 
   async function handleLike(postId) {
     const alreadyLiked = likedPosts[postId];
@@ -36,13 +48,35 @@ function Home({ session }) {
       if (alreadyLiked) {
         await unlikePost({ user_id: session.user.id, post_id: postId });
         setLikedPosts(prev => ({ ...prev, [postId]: false }));
+        setLikeCounts(prev => ({ ...prev, [postId]: Math.max(0, (prev[postId] || 1) - 1) }));
       } else {
         await likePost({ user_id: session.user.id, post_id: postId });
         setLikedPosts(prev => ({ ...prev, [postId]: true }));
+        setLikeCounts(prev => ({ ...prev, [postId]: (prev[postId] || 0) + 1 }));
       }
-    } catch (err) {
-      console.error("Like error:", err);
+    } catch (err) { console.error("Like error:", err); }
+  }
+
+  async function toggleComments(postId) {
+    const isOpen = showComments[postId];
+    setShowComments(prev => ({ ...prev, [postId]: !isOpen }));
+    if (!isOpen && !comments[postId]) {
+      try {
+        const res = await getComments(postId);
+        setComments(prev => ({ ...prev, [postId]: res.data }));
+      } catch (err) { console.error("Comment fetch error:", err); }
     }
+  }
+
+  async function handleAddComment(postId) {
+    const content = commentInputs[postId]?.trim();
+    if (!content) return;
+    try {
+      await addComment({ user_id: session.user.id, post_id: postId, content });
+      const res = await getComments(postId);
+      setComments(prev => ({ ...prev, [postId]: res.data }));
+      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+    } catch (err) { console.error("Comment error:", err); }
   }
 
   async function handleLogout() {
@@ -51,43 +85,32 @@ function Home({ session }) {
   }
 
   function handleShare(postId) {
-    const link = `${window.location.origin}/post/${postId}`;
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
     alert("Post link copied!");
   }
 
-  function getFilteredPosts() {
-    return posts.filter((post) => {
-      const searchText = `${post.caption} ${post.profiles?.username}`.toLowerCase();
-      return searchText.includes(search.toLowerCase());
-    });
-  }
-
-  const filteredPosts = getFilteredPosts();
+  const filteredPosts = posts.filter((post) =>
+    `${post.caption} ${post.profiles?.username}`.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="home-page">
-      <aside className="sidebar">
-        <div className="brand">
-          <img src={logoImg} alt="NyanScape Logo" className="logo-img" />
-          <h1>NyanScape</h1>
+      <aside className="sidebar unified-sidebar">
+        <div className="sidebar-brand" onClick={() => navigate("/fyp")}>
+          <img src={logoImg} alt="NyanScape Logo" className="sidebar-logo" />
+          <h1 className="sidebar-title">NyanScape</h1>
         </div>
-
-        <nav>
-          <button className="nav-link active">🏠 FYP</button>
-          <button className="nav-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
-          <button className="nav-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
-          <button className="nav-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
-          <button className="nav-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
-          <button className="nav-link" onClick={() => navigate("/messages")}>💬 Messages</button>
-          <button className="nav-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
+        <nav className="sidebar-nav">
+          <button className="sidebar-link active" onClick={() => navigate("/fyp")}>🏠 FYP</button>
+          <button className="sidebar-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
+          <button className="sidebar-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
+          <button className="sidebar-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
+          <button className="sidebar-link" onClick={() => navigate("/notifications")}>🔔 Notifications</button>
+          <button className="sidebar-link" onClick={() => navigate("/messages")}>💬 Messages</button>
+          <button className="sidebar-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
         </nav>
-
-        <button className="create-btn" onClick={() => navigate("/create-post")}>
-          + Create Post
-        </button>
-
-        <div className="join-card">
+        <button className="sidebar-create-btn" onClick={() => navigate("/create-post")}>+ Create Post</button>
+        <div className="sidebar-card">
           <img src={logoImg} alt="Cat mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
@@ -97,12 +120,7 @@ function Home({ session }) {
 
       <main className="feed">
         <div className="top-bar">
-          <input
-            type="text"
-            placeholder="Search posts or users..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <input type="text" placeholder="Search posts or users..." value={search} onChange={(e) => setSearch(e.target.value)} />
           <span className="bell">🔔</span>
         </div>
 
@@ -147,7 +165,10 @@ function Home({ session }) {
 
               <div className="post-actions">
                 <button onClick={() => handleLike(post.id)}>
-                  {likedPosts[post.id] ? "❤️" : "🤍"}
+                  {likedPosts[post.id] ? "❤️" : "🤍"} {likeCounts[post.id] || 0}
+                </button>
+                <button onClick={() => toggleComments(post.id)}>
+                  💬 {comments[post.id]?.length || 0}
                 </button>
                 <button onClick={() => handleShare(post.id)}>↗️ Share</button>
                 {session.user.id === post.user_id && (
@@ -157,13 +178,31 @@ function Home({ session }) {
                         const { deletePost } = await import("../lib/api");
                         await deletePost(post.id);
                         fetchPosts();
-                      } catch (err) {
-                        console.error("Delete error:", err);
-                      }
+                      } catch (err) { console.error("Delete error:", err); }
                     }
                   }}>🗑️</button>
                 )}
               </div>
+
+              {showComments[post.id] && (
+                <div className="comments">
+                  {(comments[post.id] || []).map((c) => (
+                    <div key={c.id} className="comment">
+                      <strong>{c.profiles?.username || "Unknown"}:</strong> {c.content}
+                    </div>
+                  ))}
+                  <div className="comment-input">
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      value={commentInputs[post.id] || ""}
+                      onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleAddComment(post.id); }}
+                    />
+                    <button onClick={() => handleAddComment(post.id)}>Post</button>
+                  </div>
+                </div>
+              )}
             </article>
           ))
         )}

@@ -3893,3 +3893,286 @@ footer span { color: #7c3aed; font-weight: 700; }
     align-items: flex-start;
   }
 }
+
+
+/* ══════════════════════════════════════
+   UNIFIED SIDEBAR — paste at END of App.css
+   ══════════════════════════════════════ */
+
+/* Hide scrollbars globally */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
+
+/* Unified sidebar shell */
+.unified-sidebar,
+.sidebar,
+.profile-sidebar,
+.explore-sidebar,
+.create-sidebar,
+.settings-sidebar,
+.notif-sidebar,
+.msg-sidebar {
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  box-sizing: border-box !important;
+  padding: 24px 16px !important;
+  background: #ffffff !important;
+  border-right: 1px solid #eee8f8 !important;
+}
+
+/* Unified brand row */
+.sidebar-brand,
+.profile-brand,
+.explore-brand,
+.create-brand,
+.settings-brand,
+.notif-brand,
+.msg-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 28px !important;
+  cursor: pointer !important;
+}
+
+/* Unified logo size */
+.sidebar-logo,
+.sidebar-brand img,
+.profile-brand img,
+.explore-brand img,
+.create-brand img,
+.settings-brand img,
+.notif-brand img,
+.msg-brand img,
+.logo-img {
+  width: 36px !important;
+  height: 36px !important;
+  object-fit: contain !important;
+}
+
+/* Unified title */
+.sidebar-title,
+.profile-brand h1,
+.explore-brand h1,
+.create-brand h1,
+.settings-brand h1,
+.notif-brand h1,
+.msg-brand h1,
+.brand h1 {
+  margin: 0 !important;
+  font-size: 22px !important;
+  color: #5f2eea !important;
+  font-weight: 800 !important;
+}
+
+/* Unified nav links */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-link,
+.nav-link,
+.profile-sidebar > button,
+.explore-sidebar > button,
+.create-sidebar > button,
+.settings-sidebar > button,
+.notif-sidebar > button,
+.msg-sidebar > button {
+  width: 100% !important;
+  padding: 11px 14px !important;
+  margin-bottom: 4px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #252033 !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: 0.2s ease !important;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active,
+.nav-link:hover,
+.nav-link.active,
+.profile-sidebar > button:hover,
+.profile-sidebar > button.active,
+.explore-sidebar > button:hover,
+.explore-sidebar > button.active,
+.create-sidebar > button:hover,
+.create-sidebar > button.active,
+.settings-sidebar > button:hover,
+.settings-sidebar > button.active,
+.notif-sidebar > button:hover,
+.notif-sidebar > button.active,
+.msg-sidebar > button:hover,
+.msg-sidebar > button.active {
+  background: #efe6ff !important;
+  color: #6d35e8 !important;
+  font-weight: 700 !important;
+}
+
+/* Unified create button */
+.sidebar-create-btn,
+.create-btn,
+.main-create-btn,
+.create-post-btn,
+.new-message-btn,
+.invite-btn,
+.settings-invite {
+  width: 100% !important;
+  margin-top: 16px !important;
+  padding: 12px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  background: #7c3aed !important;
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+}
+
+/* Unified bottom card */
+.sidebar-card,
+.join-card,
+.join-box,
+.profile-join-card,
+.create-join-card,
+.settings-join-card,
+.notif-join-card,
+.msg-join-card {
+  margin-top: 20px !important;
+  padding: 16px !important;
+  text-align: center !important;
+  border-radius: 16px !important;
+  background: #fbf8ff !important;
+  border: 1px solid #eee3ff !important;
+}
+
+.sidebar-card img,
+.join-card img,
+.join-box img,
+.profile-join-card img,
+.create-join-card img,
+.settings-join-card img,
+.notif-join-card img,
+.msg-join-card img {
+  width: 80px !important;
+  max-width: 100% !important;
+}
+
+.sidebar-card h3,
+.join-card h3,
+.join-box h3,
+.profile-join-card h3,
+.create-join-card h3,
+.settings-join-card h3,
+.notif-join-card h3,
+.msg-join-card h3 {
+  font-size: 13px !important;
+  margin: 8px 0 6px !important;
+}
+
+.sidebar-card p,
+.join-card p,
+.join-box p,
+.profile-join-card p,
+.create-join-card p,
+.settings-join-card p,
+.notif-join-card p,
+.msg-join-card p {
+  font-size: 12px !important;
+  color: #5f586b !important;
+  line-height: 1.4 !important;
+  margin: 0 0 10px !important;
+}
+
+.sidebar-card button,
+.join-card button,
+.join-box button,
+.profile-join-card button,
+.create-join-card button,
+.settings-join-card button,
+.notif-join-card button,
+.msg-join-card button {
+  padding: 8px 14px !important;
+  border: 1px solid #7c3aed !important;
+  border-radius: 10px !important;
+  background: white !important;
+  color: #6d35e8 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+/* Unified grid layouts */
+.home-page { grid-template-columns: 250px 1fr 300px !important; }
+.profile-page { grid-template-columns: 250px 1fr 300px !important; }
+.explore-page { grid-template-columns: 250px 1fr 300px !important; }
+.create-page { grid-template-columns: 250px 1fr 300px !important; }
+.settings-page { grid-template-columns: 250px 1fr 300px !important; }
+.notifications-page { grid-template-columns: 250px 1fr 300px !important; }
+.messages-page { grid-template-columns: 250px 1fr !important; }
+
+/* Comment styles for Home feed */
+.comments {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0ebff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.comment { font-size: 0.88rem; color: #444; }
+.comment strong { color: #7c3aed; margin-right: 4px; }
+.comment-input { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.comment-input input {
+  flex: 1;
+  padding: 0.45rem 0.85rem;
+  border: 1.5px solid #ede9ff;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  outline: none;
+}
+.comment-input input:focus { border-color: #7c3aed; }
+.comment-input button {
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* User avatar placeholder */
+.user-avatar-placeholder {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #efe6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+/* Profile avatar placeholder */
+.profile-avatar-placeholder {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  border: 6px solid white;
+  background: #efe6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}

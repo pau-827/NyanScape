@@ -31,16 +31,20 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '1.5rem' }}>Loading... 🐱</div>;
+  if (loading) return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontSize: "1.5rem" }}>
+      Loading... 🐱
+    </div>
+  );
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth pages - redirect to fyp if already logged in */}
+        {/* Auth pages — no navbar/footer, they handle their own */}
         <Route path="/login" element={!session ? <Login /> : <Navigate to="/fyp" replace />} />
         <Route path="/register" element={!session ? <Register /> : <Navigate to="/fyp" replace />} />
 
-        {/* Protected pages - redirect to login if not logged in */}
+        {/* Protected pages */}
         <Route path="/" element={<Navigate to={session ? "/fyp" : "/login"} replace />} />
         <Route path="/fyp" element={session ? <Home session={session} /> : <Navigate to="/login" replace />} />
         <Route path="/explore" element={session ? <Explore session={session} /> : <Navigate to="/login" replace />} />

@@ -102,3 +102,13 @@ All notable changes to this project will be documented in this file.
 ### Removed
 
 - `[Muit]` - Removed duplicate Azure workflow file
+
+### Fixed
+
+- `[Muit]` - Fixed the header and footer in auth pages that disappeared
+- `[Muit]` - Tried adjusting side navigation bar to unify size across all pages
+
+### Added
+
+- `[Muit]` - Added Comment button and function and connected it and like to backend
+ 
