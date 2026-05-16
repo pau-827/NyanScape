@@ -1,12 +1,25 @@
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
 }
 
-html, body, #root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+body {
+  background: #f6f0ff;
+  font-family: Arial, sans-serif;
+  color: #181320;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
 }

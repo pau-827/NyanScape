@@ -47,6 +47,7 @@ All notable changes to this project will be documented in this file.
 - `[Panliboton]` - Created the Notification page UI
 - `[Panliboton]` - Created the Message page UI 
 - `[Panliboton]` - Created the Settings page UI 
-
+## [2025-05-15]
+- `[Panliboton]` - Fixing some features in every pages 
 
 

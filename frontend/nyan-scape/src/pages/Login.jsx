@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../lib/api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -10,20 +9,23 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     setLoading(true);
     setError("");
 
-    try {
-      await login({ email, password });
-      navigate("/fyp");
-    } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
-    } finally {
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter your email and password.");
       setLoading(false);
+      return;
     }
+
+    localStorage.setItem("nyanscape_logged_in", "true");
+    localStorage.setItem("nyanscape_user_email", email);
+
+    setLoading(false);
+    navigate("/fyp");
   };
 
   return (

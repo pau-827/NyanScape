@@ -1,17 +1,29 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
 import catImg from "../assets/cat.webp";
 import lunaImg from "../assets/luna.webp";
-import playImg from "../assets/play.jpg";
 import logoImg from "../assets/logo.png";
+
 function Notifications() {
   const navigate = useNavigate();
+
+  const savedProfile =
+    JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+  const [userAvatar, setUserAvatar] = useState(
+    savedProfile.profilePhoto || catImg
+  );
+  const [userName, setUserName] = useState(
+    savedProfile.displayName || "CatLover_23"
+  );
 
   const [activeFilter, setActiveFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [followedUsers, setFollowedUsers] = useState([]);
+
   const [settingsOpen, setSettingsOpen] = useState({
     push: true,
     email: false,
@@ -22,43 +34,60 @@ function Notifications() {
     shares: true,
   });
 
+  useEffect(() => {
+    function syncProfile() {
+      const updatedProfile =
+        JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+      setUserAvatar(updatedProfile.profilePhoto || catImg);
+      setUserName(updatedProfile.displayName || "CatLover_23");
+    }
+
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
+
+    return () => {
+      window.removeEventListener("storage", syncProfile);
+    };
+  }, []);
+
   const defaultNotifications = [
-  {
-    id: 1,
-    type: "likes",
-    user: "WhiskerMom",
-    message: "liked your post.",
-    detail: "",
-    time: "2 minutes ago",
-    avatar: catImg,
-    image: lunaImg,
-    unread: true,
-  },
-  {
-    id: 2,
-    type: "comments",
-    user: "PawHunter",
-    message: "commented on your post:",
-    detail: "So adorable!",
-    time: "5 minutes ago",
-    avatar: lunaImg,
-    image: catImg,
-    unread: true,
-  },
-];
+    {
+      id: 1,
+      type: "likes",
+      user: "WhiskerMom",
+      message: "liked your post.",
+      detail: "",
+      time: "2 minutes ago",
+      avatar: catImg,
+      image: lunaImg,
+      unread: true,
+    },
+    {
+      id: 2,
+      type: "comments",
+      user: "PawHunter",
+      message: "commented on your post:",
+      detail: "So adorable!",
+      time: "5 minutes ago",
+      avatar: lunaImg,
+      image: catImg,
+      unread: true,
+    },
+  ];
 
-function getStoredNotifications() {
-  try {
-    return JSON.parse(localStorage.getItem("nyanscape_notifications")) || [];
-  } catch {
-    return [];
+  function getStoredNotifications() {
+    try {
+      return JSON.parse(localStorage.getItem("nyanscape_notifications")) || [];
+    } catch {
+      return [];
+    }
   }
-}
 
-const [notifications, setNotifications] = useState(() => [
-  ...getStoredNotifications(),
-  ...defaultNotifications,
-]);
+  const [notifications, setNotifications] = useState(() => [
+    ...getStoredNotifications(),
+    ...defaultNotifications,
+  ]);
 
   const filters = [
     { key: "all", label: "All", icon: "🔔" },
@@ -88,6 +117,7 @@ const [notifications, setNotifications] = useState(() => [
 
   const perPage = 5;
   const totalPages = Math.ceil(filteredNotifications.length / perPage) || 1;
+
   const paginatedNotifications = filteredNotifications.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
@@ -100,53 +130,53 @@ const [notifications, setNotifications] = useState(() => [
     shares: notifications.filter((item) => item.type === "shares").length,
   };
 
-function saveNotifications(updatedNotifications) {
-  setNotifications(updatedNotifications);
+  function saveNotifications(updatedNotifications) {
+    setNotifications(updatedNotifications);
 
-  const customOnly = updatedNotifications.filter(
-    (item) => Number(item.id) > 1000
-  );
+    const customOnly = updatedNotifications.filter(
+      (item) => Number(item.id) > 1000
+    );
 
-  localStorage.setItem(
-    "nyanscape_notifications",
-    JSON.stringify(customOnly)
-  );
-}
+    localStorage.setItem(
+      "nyanscape_notifications",
+      JSON.stringify(customOnly)
+    );
+  }
 
-function markAllAsRead() {
-  const updatedNotifications = notifications.map((notification) => ({
-    ...notification,
-    unread: false,
-  }));
+  function markAllAsRead() {
+    const updatedNotifications = notifications.map((notification) => ({
+      ...notification,
+      unread: false,
+    }));
 
-  saveNotifications(updatedNotifications);
-}
+    saveNotifications(updatedNotifications);
+  }
 
-function markOneAsRead(id) {
-  const updatedNotifications = notifications.map((notification) =>
-    notification.id === id ? { ...notification, unread: false } : notification
-  );
+  function markOneAsRead(id) {
+    const updatedNotifications = notifications.map((notification) =>
+      notification.id === id ? { ...notification, unread: false } : notification
+    );
 
-  saveNotifications(updatedNotifications);
-}
+    saveNotifications(updatedNotifications);
+  }
 
-function deleteNotification(id) {
-  const confirmDelete = window.confirm("Remove this notification?");
-  if (!confirmDelete) return;
+  function deleteNotification(id) {
+    const confirmDelete = window.confirm("Remove this notification?");
+    if (!confirmDelete) return;
 
-  const updatedNotifications = notifications.filter(
-    (notification) => notification.id !== id
-  );
+    const updatedNotifications = notifications.filter(
+      (notification) => notification.id !== id
+    );
 
-  saveNotifications(updatedNotifications);
-}
+    saveNotifications(updatedNotifications);
+  }
 
   function followBack(user) {
-    if (followedUsers.includes(user)) {
-      setFollowedUsers(followedUsers.filter((item) => item !== user));
-    } else {
-      setFollowedUsers([...followedUsers, user]);
-    }
+    setFollowedUsers((prev) =>
+      prev.includes(user)
+        ? prev.filter((item) => item !== user)
+        : [...prev, user]
+    );
   }
 
   function openNotification(notification) {
@@ -187,22 +217,18 @@ function deleteNotification(id) {
         <button onClick={() => navigate("/fyp")}>🏠 FYP</button>
         <button onClick={() => navigate("/explore")}>🔍 Explore</button>
         <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
+        <button onClick={() => navigate("/fyp")}>🔖 Bookmarks</button>
         <button onClick={() => navigate("/profile")}>👤 My Profile</button>
         <button className="active">🔔 Notifications</button>
         <button onClick={() => navigate("/messages")}>💬 Messages</button>
         <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
 
-        <button className="invite-btn" onClick={() => alert("Invite link copied!")}>
+        <button
+          className="invite-btn"
+          onClick={() => alert("Invite link copied!")}
+        >
           🐾 Invite Friends
         </button>
-
-        <div className="notif-join-card">
-          <img src={logoImg} alt="Mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
-        </div>
       </aside>
 
       <main className="notif-main">
@@ -216,9 +242,16 @@ function deleteNotification(id) {
               setCurrentPage(1);
             }}
           />
-          <button onClick={() => alert("Notifications refreshed!")}>🔔</button>
-          <img src={catImg} alt="User avatar" />
-          <strong>CatLover_23</strong>
+
+          <button onClick={() => setCurrentPage(1)}>🔔</button>
+
+          <img
+            src={userAvatar}
+            alt="User avatar"
+            onClick={() => navigate("/profile")}
+          />
+
+          <strong>{userName}</strong>
         </div>
 
         <header className="notif-header">
@@ -261,7 +294,7 @@ function deleteNotification(id) {
                   key={notification.id}
                 >
                   <img
-                    src={notification.avatar}
+                    src={notification.avatar || userAvatar}
                     alt={notification.user}
                     className="notif-avatar"
                     onClick={() => navigate("/profile")}
@@ -275,7 +308,9 @@ function deleteNotification(id) {
                       <strong>{notification.user}</strong> {notification.message}
                     </p>
 
-                    {notification.detail && <p className="notif-detail">“{notification.detail}”</p>}
+                    {notification.detail && (
+                      <p className="notif-detail">“{notification.detail}”</p>
+                    )}
 
                     <span>{notification.time}</span>
                   </div>
@@ -392,7 +427,7 @@ function deleteNotification(id) {
         <div className="notif-right-card quote-card">
           <h3>💬 Purrspiration</h3>
           <p>“A happy cat makes for a happy human.”</p>
-          <img src="/logo.png" alt="Cat" />
+          <img src={logoImg} alt="Cat" />
         </div>
       </aside>
     </div>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
@@ -10,12 +10,44 @@ import logoImg from "../assets/logo.png";
 function Explore() {
   const navigate = useNavigate();
 
+  const savedProfile =
+    JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+  const [userAvatar, setUserAvatar] = useState(
+    savedProfile.profilePhoto || catImg
+  );
+
+  const [userName, setUserName] = useState(
+    savedProfile.displayName || "CatLover_23"
+  );
+
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("forYou");
   const [selectedImage, setSelectedImage] = useState(null);
   const [followedUsers, setFollowedUsers] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
+
+  useEffect(() => {
+    function syncProfile() {
+      const updatedProfile =
+        JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+      setUserAvatar(updatedProfile.profilePhoto || catImg);
+
+      setUserName(
+        updatedProfile.displayName || "CatLover_23"
+      );
+    }
+
+    syncProfile();
+
+    window.addEventListener("storage", syncProfile);
+
+    return () => {
+      window.removeEventListener("storage", syncProfile);
+    };
+  }, []);
 
   const hashtags = [
     { tag: "#Caturday", count: "2.1K posts" },
@@ -50,11 +82,11 @@ function Explore() {
     },
     {
       id: 3,
-      username: "CatLover_23",
+      username: userName,
       time: "6h ago",
       title: "Playtime is the best time! 🧶🐱",
       tags: "#Playtime #HappyCat #NyanScape",
-      image: playImg,
+      image: userAvatar,
       likes: 76,
       comments: 9,
       shares: 5,
@@ -104,7 +136,9 @@ function Explore() {
 
   const filteredPosts = useMemo(() => {
     let result = posts.filter((post) => {
-      const text = `${post.username} ${post.title} ${post.tags}`.toLowerCase();
+      const text =
+        `${post.username} ${post.title} ${post.tags}`.toLowerCase();
+
       return text.includes(search.toLowerCase());
     });
 
@@ -123,80 +157,142 @@ function Explore() {
     }
 
     if (activeTab === "bookmarks") {
-      result = result.filter((post) => savedPosts.includes(post.id));
+      result = result.filter((post) =>
+        savedPosts.includes(post.id)
+      );
     }
 
     return result;
-  }, [search, activeTab, savedPosts]);
+  }, [search, activeTab, savedPosts, posts]);
 
   function toggleLike(id) {
     setLikedPosts((prev) =>
-      prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((postId) => postId !== id)
+        : [...prev, id]
     );
   }
 
   function toggleSave(id) {
     setSavedPosts((prev) =>
-      prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((postId) => postId !== id)
+        : [...prev, id]
     );
   }
 
   function sharePost(id) {
-    navigator.clipboard.writeText(`${window.location.origin}/post/${id}`);
+    navigator.clipboard.writeText(
+      `${window.location.origin}/post/${id}`
+    );
+
     alert("Post link copied!");
   }
 
   function commentPost() {
     const comment = prompt("Write your comment:");
-    if (comment) alert("Comment added!");
+
+    if (comment) {
+      alert("Comment added!");
+    }
   }
 
   function toggleFollow(user) {
     setFollowedUsers((prev) =>
-      prev.includes(user) ? prev.filter((name) => name !== user) : [...prev, user]
+      prev.includes(user)
+        ? prev.filter((name) => name !== user)
+        : [...prev, user]
     );
   }
 
   return (
     <div className="explore-page">
       <aside className="explore-sidebar">
-        <div className="explore-brand">
+        <div
+          className="explore-brand"
+          onClick={() => navigate("/fyp")}
+        >
           <img src={logoImg} alt="NyanScape" />
           <h1>NyanScape</h1>
         </div>
 
         <nav>
-          <button className="nav-link" onClick={() => navigate("/fyp")}>
+          <button
+            className="nav-link"
+            onClick={() => navigate("/fyp")}
+          >
             🏠 FYP
           </button>
-          <button className="nav-link active">🔍 Explore</button>
-          <button className="nav-link" onClick={() => navigate("/create-post")}>
+
+          <button className="nav-link active">
+            🔍 Explore
+          </button>
+
+          <button
+            className="nav-link"
+            onClick={() => navigate("/create-post")}
+          >
             ➕ Create Post
           </button>
-          <button className="nav-link" onClick={() => setActiveTab("bookmarks")}>
+
+          <button
+            className="nav-link"
+            onClick={() => setActiveTab("bookmarks")}
+          >
             🔖 Bookmarks
           </button>
-          <button className="nav-link" onClick={() => navigate("/profile")}>
+
+          <button
+            className="nav-link"
+            onClick={() => navigate("/profile")}
+          >
             👤 My Profile
           </button>
-          <button className="nav-link" onClick={() => navigate("/notif")}>🔔 Notifcations</button>
-          <button className="nav-link" onClick={() => navigate("/messages")}>
+
+          <button
+            className="nav-link"
+            onClick={() => navigate("/notif")}
+          >
+            🔔 Notifications
+          </button>
+
+          <button
+            className="nav-link"
+            onClick={() => navigate("/messages")}
+          >
             💬 Messages
           </button>
-          <button className="nav-link" onClick={() => navigate("/settings")}>
+
+          <button
+            className="nav-link"
+            onClick={() => navigate("/settings")}
+          >
             ⚙️ Settings
           </button>
         </nav>
 
-        <button className="create-post-btn" onClick={() => navigate("/create-post")}>
+        <button
+          className="create-post-btn"
+          onClick={() => navigate("/create-post")}
+        >
           + Create Post
         </button>
 
         <div className="join-box">
           <img src={logoImg} alt="Cat mascot" />
+
           <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
+
+          <p>
+            Share your cat stories, photos, and moments with
+            fellow cat lovers!
+          </p>
+
+          <button
+            onClick={() => alert("Invite link copied!")}
+          >
+            Invite Friends
+          </button>
         </div>
       </aside>
 
@@ -208,41 +304,68 @@ function Explore() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button onClick={() => navigate("/notif")}>🔔</button>
-          <img src={catImg} alt="profile" />
+
+          <button onClick={() => navigate("/notif")}>
+            🔔
+          </button>
+
+          <img
+            src={userAvatar}
+            alt="profile"
+            onClick={() => navigate("/profile")}
+            style={{ cursor: "pointer" }}
+          />
         </div>
 
         <section className="explore-header">
           <h2>Explore ✨</h2>
-          <p>Discover trending cats, popular posts, and new friends 🐾</p>
+
+          <p>
+            Discover trending cats, popular posts, and new
+            friends 🐾
+          </p>
 
           <div className="explore-tabs">
             <button
-              className={activeTab === "forYou" ? "active" : ""}
+              className={
+                activeTab === "forYou" ? "active" : ""
+              }
               onClick={() => setActiveTab("forYou")}
             >
               For You
             </button>
+
             <button
-              className={activeTab === "trending" ? "active" : ""}
+              className={
+                activeTab === "trending" ? "active" : ""
+              }
               onClick={() => setActiveTab("trending")}
             >
               Trending
             </button>
+
             <button
-              className={activeTab === "recent" ? "active" : ""}
+              className={
+                activeTab === "recent" ? "active" : ""
+              }
               onClick={() => setActiveTab("recent")}
             >
               Recent
             </button>
+
             <button
-              className={activeTab === "people" ? "active" : ""}
+              className={
+                activeTab === "people" ? "active" : ""
+              }
               onClick={() => setActiveTab("people")}
             >
               People
             </button>
+
             <button
-              className={activeTab === "tags" ? "active" : ""}
+              className={
+                activeTab === "tags" ? "active" : ""
+              }
               onClick={() => setActiveTab("tags")}
             >
               Tags
@@ -253,12 +376,18 @@ function Explore() {
         <section className="hashtag-box">
           <div className="section-title">
             <h3>Trending Hashtags</h3>
-            <button onClick={() => setSearch("#")}>See all →</button>
+
+            <button onClick={() => setSearch("#")}>
+              See all →
+            </button>
           </div>
 
           <div className="hashtag-row">
             {hashtags.map((item) => (
-              <button key={item.tag} onClick={() => setSearch(item.tag)}>
+              <button
+                key={item.tag}
+                onClick={() => setSearch(item.tag)}
+              >
                 <strong>{item.tag}</strong>
                 <span>{item.count}</span>
               </button>
@@ -268,45 +397,84 @@ function Explore() {
 
         <section className="popular-posts">
           <div className="section-title">
-            <h3>{activeTab === "bookmarks" ? "Saved Posts" : "Popular Posts"}</h3>
-            <button onClick={() => setActiveTab("trending")}>See all →</button>
+            <h3>
+              {activeTab === "bookmarks"
+                ? "Saved Posts"
+                : "Popular Posts"}
+            </h3>
+
+            <button
+              onClick={() => setActiveTab("trending")}
+            >
+              See all →
+            </button>
           </div>
 
           {filteredPosts.length === 0 ? (
             <div className="empty-explore">
               <h3>No results found 🐾</h3>
-              <p>Try searching another cat, user, or hashtag.</p>
+
+              <p>
+                Try searching another cat, user, or hashtag.
+              </p>
             </div>
           ) : (
             <div className="explore-grid">
               {filteredPosts.map((post) => (
-                <article className="explore-card" key={post.id}>
+                <article
+                  className="explore-card"
+                  key={post.id}
+                >
                   <div className="card-top">
                     <div>
                       <strong>{post.username}</strong>
                       <p>{post.time}</p>
                     </div>
-                    <button onClick={() => toggleSave(post.id)}>
-                      {savedPosts.includes(post.id) ? "🔖" : "•••"}
+
+                    <button
+                      onClick={() => toggleSave(post.id)}
+                    >
+                      {savedPosts.includes(post.id)
+                        ? "🔖"
+                        : "•••"}
                     </button>
                   </div>
 
                   <img
                     src={post.image}
                     alt={post.title}
-                    onClick={() => setSelectedImage(post.image)}
+                    onClick={() =>
+                      setSelectedImage(post.image)
+                    }
                   />
 
                   <h4>{post.title}</h4>
-                  <p className="post-tags">{post.tags}</p>
+
+                  <p className="post-tags">
+                    {post.tags}
+                  </p>
 
                   <div className="card-actions">
-                    <button onClick={() => toggleLike(post.id)}>
-                      {likedPosts.includes(post.id) ? "❤️" : "🤍"}{" "}
-                      {likedPosts.includes(post.id) ? post.likes + 1 : post.likes}
+                    <button
+                      onClick={() => toggleLike(post.id)}
+                    >
+                      {likedPosts.includes(post.id)
+                        ? "❤️"
+                        : "🤍"}{" "}
+                      {likedPosts.includes(post.id)
+                        ? post.likes + 1
+                        : post.likes}
                     </button>
-                    <button onClick={commentPost}>💬 {post.comments}</button>
-                    <button onClick={() => sharePost(post.id)}>↗️ {post.shares}</button>
+
+                    <button onClick={commentPost}>
+                      💬 {post.comments}
+                    </button>
+
+                    <button
+                      onClick={() => sharePost(post.id)}
+                    >
+                      ↗️ {post.shares}
+                    </button>
                   </div>
                 </article>
               ))}
@@ -316,33 +484,21 @@ function Explore() {
 
         <section className="category-box">
           <h3>Explore by Categories</h3>
+
           <div className="category-row">
-            {["Cute Cats", "Funny Cats", "Sleepy Cats", "Kittens", "Cat Photography"].map(
-              (category) => (
-                <button key={category} onClick={() => setSearch(category)}>
-                  🐱 {category}
-                </button>
-              )
-            )}
-          </div>
-        </section>
-
-        <section className="suggested-bottom">
-          <div className="section-title">
-            <h3>Suggested Users</h3>
-            <button onClick={() => alert("Showing all suggested users!")}>See all →</button>
-          </div>
-
-          <div className="user-row">
-            {users.map((user) => (
-              <div className="user-card" key={user}>
-                <img src={catImg} alt={user} />
-                <strong>{user}</strong>
-                <p>@{user.toLowerCase()}</p>
-                <button onClick={() => toggleFollow(user)}>
-                  {followedUsers.includes(user) ? "Following" : "Follow"}
-                </button>
-              </div>
+            {[
+              "Cute Cats",
+              "Funny Cats",
+              "Sleepy Cats",
+              "Kittens",
+              "Cat Photography",
+            ].map((category) => (
+              <button
+                key={category}
+                onClick={() => setSearch(category)}
+              >
+                🐱 {category}
+              </button>
             ))}
           </div>
         </section>
@@ -351,21 +507,34 @@ function Explore() {
       <aside className="explore-right">
         <div className="right-card">
           <h3>🐾 Trending Tags</h3>
+
           {hashtags.map((item) => (
-            <p key={item.tag} onClick={() => setSearch(item.tag)}>
+            <p
+              key={item.tag}
+              onClick={() => setSearch(item.tag)}
+            >
               {item.tag} <span>{item.count}</span>
             </p>
           ))}
-          <button onClick={() => setSearch("#")}>View all trends →</button>
+
+          <button onClick={() => setSearch("#")}>
+            View all trends →
+          </button>
         </div>
 
         <div className="right-card">
           <h3>Who to Follow</h3>
+
           {users.slice(2).map((user) => (
             <div className="mini-user" key={user}>
               <span>🐱 {user}</span>
-              <button onClick={() => toggleFollow(user)}>
-                {followedUsers.includes(user) ? "Following" : "Follow"}
+
+              <button
+                onClick={() => toggleFollow(user)}
+              >
+                {followedUsers.includes(user)
+                  ? "Following"
+                  : "Follow"}
               </button>
             </div>
           ))}
@@ -373,18 +542,31 @@ function Explore() {
 
         <div className="right-card quote">
           <h3>Daily Purrspiration</h3>
-          <p>“Time spent with cats is never wasted.”</p>
+
+          <p>
+            “Time spent with cats is never wasted.”
+          </p>
+
           <span>– Sigmund Freud</span>
         </div>
       </aside>
 
-      <button className="floating-paw" onClick={() => navigate("/create-post")}>
+      <button
+        className="floating-paw"
+        onClick={() => navigate("/create-post")}
+      >
         🐾
       </button>
 
       {selectedImage && (
-        <div className="image-preview" onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Preview" />
+        <div
+          className="image-preview"
+          onClick={() => setSelectedImage(null)}
+        >
+          <img
+            src={selectedImage}
+            alt="Preview"
+          />
         </div>
       )}
     </div>

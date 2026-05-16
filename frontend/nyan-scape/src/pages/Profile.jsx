@@ -11,14 +11,21 @@ import cover from "../assets/cover.jpg";
 function Profile() {
   const navigate = useNavigate();
 
-  const savedAvatar = localStorage.getItem("nyanscape_avatar");
+  const savedProfile = JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
 
   const [activeTab, setActiveTab] = useState("posts");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [profileName, setProfileName] = useState("CatLover_23");
-  const [avatar, setAvatar] = useState(savedAvatar || catImg);
+
+  const [profileName, setProfileName] = useState(
+    savedProfile.displayName || "CatLover_23"
+  );
+  const [username, setUsername] = useState(
+    savedProfile.username || "@catlover23"
+  );
+  const [avatar, setAvatar] = useState(savedProfile.profilePhoto || catImg);
   const [bio, setBio] = useState(
-    "Cat lover, photographer, and proud cat parent of 2 fur babies. Sharing daily doses of purrs and paws!"
+    savedProfile.bio ||
+      "Cat lover, photographer, and proud cat parent of 2 fur babies. Sharing daily doses of purrs and paws!"
   );
 
   const defaultPosts = useMemo(
@@ -60,17 +67,29 @@ function Profile() {
     []
   );
 
-function getStoredPosts() {
-  try {
-    const savedPosts = JSON.parse(localStorage.getItem("nyanscape_posts")) || [];
+  function saveProfileData(nextProfile) {
+    const currentProfile = JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
 
-    return savedPosts.filter(
-      (post) => post.image && !String(post.image).startsWith("blob:")
+    localStorage.setItem(
+      "nyanscape_profile",
+      JSON.stringify({
+        ...currentProfile,
+        ...nextProfile,
+      })
     );
-  } catch {
-    return [];
   }
-}
+
+  function getStoredPosts() {
+    try {
+      const savedPosts = JSON.parse(localStorage.getItem("nyanscape_posts")) || [];
+
+      return savedPosts.filter(
+        (post) => post.image && !String(post.image).startsWith("blob:")
+      );
+    } catch {
+      return [];
+    }
+  }
 
   const initialPosts = useMemo(() => {
     const storedPosts = getStoredPosts();
@@ -86,12 +105,7 @@ function getStoredPosts() {
 
   function updatePosts(updatedPosts) {
     setPosts(updatedPosts);
-
-    const storedOnly = updatedPosts.filter(
-      (post) => !String(post.id).startsWith("default-")
-    );
-
-    localStorage.setItem("nyanscape_posts", JSON.stringify(storedOnly));
+    localStorage.setItem("nyanscape_posts", JSON.stringify(updatedPosts));
   }
 
   function handleEditAvatar(e) {
@@ -102,9 +116,9 @@ function getStoredPosts() {
 
     reader.onloadend = () => {
       const imageData = reader.result;
+
       setAvatar(imageData);
-      localStorage.setItem("nyanscape_avatar", imageData);
-      window.dispatchEvent(new Event("avatarUpdated"));
+      saveProfileData({ profilePhoto: imageData });
     };
 
     reader.readAsDataURL(file);
@@ -151,10 +165,23 @@ function getStoredPosts() {
 
   function handleEditProfile() {
     const newName = prompt("Enter your display name:", profileName);
+    const newUsername = prompt("Enter your username:", username);
     const newBio = prompt("Enter your bio:", bio);
 
-    if (newName?.trim()) setProfileName(newName.trim());
-    if (newBio?.trim()) setBio(newBio.trim());
+    const updatedName = newName?.trim() || profileName;
+    const updatedUsername = newUsername?.trim() || username;
+    const updatedBio = newBio?.trim() || bio;
+
+    setProfileName(updatedName);
+    setUsername(updatedUsername);
+    setBio(updatedBio);
+
+    saveProfileData({
+      displayName: updatedName,
+      username: updatedUsername,
+      bio: updatedBio,
+      profilePhoto: avatar,
+    });
   }
 
   function handleDeletePost(id) {
@@ -236,7 +263,7 @@ function getStoredPosts() {
 
             <div className="profile-text">
               <h2>{profileName}</h2>
-              <p className="handle">@catlover23</p>
+              <p className="handle">{username}</p>
               <span className="badge">Cat Enthusiast 🐱</span>
               <p className="bio">{bio}</p>
 

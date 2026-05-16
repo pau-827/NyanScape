@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
@@ -9,6 +9,12 @@ import logoImg from "../assets/logo.png";
 
 function CreatePost() {
   const navigate = useNavigate();
+
+  const savedProfile = JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+  const [userAvatar, setUserAvatar] = useState(savedProfile.profilePhoto || catImg);
+  const [userName, setUserName] = useState(savedProfile.displayName || "CatLover_23");
+  const [userHandle, setUserHandle] = useState(savedProfile.username || "@catlover23");
 
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState("");
@@ -22,18 +28,34 @@ function CreatePost() {
     { id: 3, title: "Sunbathing ☀️", time: "2 days ago", image: lunaImg },
   ]);
 
-function handleFileChange(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  useEffect(() => {
+    function syncProfile() {
+      const updatedProfile =
+        JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
 
-  const reader = new FileReader();
+      setUserAvatar(updatedProfile.profilePhoto || catImg);
+      setUserName(updatedProfile.displayName || "CatLover_23");
+      setUserHandle(updatedProfile.username || "@catlover23");
+    }
 
-  reader.onloadend = () => {
-    setImagePreview(reader.result);
-  };
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
 
-  reader.readAsDataURL(file);
-}
+    return () => window.removeEventListener("storage", syncProfile);
+  }, []);
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  }
 
   function handlePostNow(e) {
     e.preventDefault();
@@ -51,9 +73,9 @@ function handleFileChange(e) {
     const savedPosts = JSON.parse(localStorage.getItem("nyanscape_posts")) || [];
 
     const newPost = {
-      id: Date.now(),
-      username: "CatLover_23",
-      handle: "@catlover23",
+      id: `post-${Date.now()}`,
+      username: userName,
+      handle: userHandle,
       time: "Just now",
       title: caption,
       caption,
@@ -61,16 +83,21 @@ function handleFileChange(e) {
         ? tags.split(" ").filter((tag) => tag.trim() !== "")
         : ["#CatLife", "#NyanScape"],
       image: imagePreview,
+      avatar: userAvatar,
       likes: 0,
       comments: 0,
       shares: 0,
       liked: false,
       bookmarked: false,
+      commentList: [],
       category: category || "General",
       privacy,
     };
 
-    localStorage.setItem("nyanscape_posts", JSON.stringify([newPost, ...savedPosts]));
+    localStorage.setItem(
+      "nyanscape_posts",
+      JSON.stringify([newPost, ...savedPosts])
+    );
 
     alert("Post published successfully!");
     navigate("/fyp");
@@ -113,46 +140,28 @@ function handleFileChange(e) {
           <h1>NyanScape</h1>
         </div>
 
-        <button className="nav-link" onClick={() => navigate("/fyp")}>
-          🏠 FYP
-        </button>
-        <button className="nav-link" onClick={() => navigate("/explore")}>
-          🔍 Explore
-        </button>
-        <button className="nav-link active">
-          ➕ Create Post
-        </button>
-        <button className="nav-link" onClick={() => navigate("/fyp")}>
-          🔖 Bookmarks
-        </button>
-        <button className="nav-link" onClick={() => navigate("/profile")}>
-          👤 My Profile
-        </button>
-        <button className="nav-link" onClick={() => navigate("/notif")}>
-          🔔 Notifications
-        </button>
-        <button className="nav-link" onClick={() => navigate("/messages")}>
-          💬 Messages
-        </button>
-        <button className="nav-link" onClick={() => navigate("/settings")}>
-          ⚙️ Settings
-        </button>
+        <button className="nav-link" onClick={() => navigate("/fyp")}>🏠 FYP</button>
+        <button className="nav-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
+        <button className="nav-link active">➕ Create Post</button>
+        <button className="nav-link" onClick={() => navigate("/fyp")}>🔖 Bookmarks</button>
+        <button className="nav-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
+        <button className="nav-link" onClick={() => navigate("/notif")}>🔔 Notifications</button>
+        <button className="nav-link" onClick={() => navigate("/messages")}>💬 Messages</button>
+        <button className="nav-link" onClick={() => navigate("/settings")}>⚙️ Settings</button>
 
         <button className="main-create-btn">+ Create Post</button>
-
-        <div className="create-join-card">
-          <img src={logoImg} alt="Mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
-        </div>
       </aside>
 
       <main className="create-main">
         <div className="create-topbar">
           <input type="text" placeholder="Search cats, users, or tags..." />
           <button onClick={() => navigate("/notif")}>🔔</button>
-          <img src={catImg} alt="User avatar" />
+          <img
+            src={userAvatar}
+            alt="User avatar"
+            onClick={() => navigate("/profile")}
+          />
+          <strong>{userName}</strong>
         </div>
 
         <header className="create-header">
@@ -171,7 +180,10 @@ function handleFileChange(e) {
           <p className="count">{caption.length}/1000</p>
 
           <label>Add Photos / Videos</label>
-          <div className="upload-box" onClick={() => document.getElementById("post-image").click()}>
+          <div
+            className="upload-box"
+            onClick={() => document.getElementById("post-image").click()}
+          >
             {imagePreview ? (
               <img src={imagePreview} alt="Preview" className="big-preview" />
             ) : (
@@ -184,10 +196,20 @@ function handleFileChange(e) {
             )}
           </div>
 
-          <input id="post-image" type="file" accept="image/*" onChange={handleFileChange} hidden />
+          <input
+            id="post-image"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            hidden
+          />
 
           {imagePreview && (
-            <button type="button" className="remove-photo" onClick={() => setImagePreview(null)}>
+            <button
+              type="button"
+              className="remove-photo"
+              onClick={() => setImagePreview(null)}
+            >
               Remove Photo
             </button>
           )}
@@ -205,7 +227,9 @@ function handleFileChange(e) {
               <button
                 type="button"
                 key={tag}
-                onClick={() => setTags(tags.includes(tag) ? tags : `${tags} ${tag}`.trim())}
+                onClick={() =>
+                  setTags(tags.includes(tag) ? tags : `${tags} ${tag}`.trim())
+                }
               >
                 {tag}
               </button>
@@ -250,59 +274,13 @@ function handleFileChange(e) {
       </main>
 
       <aside className="create-right">
-        <div className="tips-card">
-          <h3>💡 Posting Tips</h3>
-
-          <div className="tip">
-            <span>📷</span>
-            <div>
-              <strong>Use high-quality photos</strong>
-              <p>Clear photos get more love!</p>
-            </div>
-          </div>
-
-          <div className="tip">
-            <span>#</span>
-            <div>
-              <strong>Add relevant tags</strong>
-              <p>Help others discover your post.</p>
-            </div>
-          </div>
-
-          <div className="tip">
-            <span>❤️</span>
-            <div>
-              <strong>Be authentic</strong>
-              <p>Share your true cat moments!</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="draft-card">
-          <div className="card-title">
-            <h3>📝 Recent Drafts</h3>
-            <button onClick={() => alert(`${drafts.length} drafts found`)}>View All</button>
-          </div>
-
-          {drafts.map((draft) => (
-            <div className="draft-item" key={draft.id}>
-              <img src={draft.image} alt={draft.title} />
-              <div>
-                <strong>{draft.title}</strong>
-                <p>{draft.time}</p>
-              </div>
-              <button onClick={() => handleRemoveDraft(draft.id)}>×</button>
-            </div>
-          ))}
-        </div>
-
         <div className="preview-card">
           <h3>👀 Post Preview</h3>
           <div className="preview-post">
             <div className="preview-user">
-              <img src={catImg} alt="User" />
+              <img src={userAvatar} alt="User" />
               <div>
-                <strong>CatLover_23</strong>
+                <strong>{userName}</strong>
                 <p>🌐 {privacy}</p>
               </div>
             </div>
@@ -322,6 +300,26 @@ function handleFileChange(e) {
               <span>↗ Share</span>
             </div>
           </div>
+        </div>
+
+        <div className="draft-card">
+          <div className="card-title">
+            <h3>📝 Recent Drafts</h3>
+            <button onClick={() => alert(`${drafts.length} drafts found`)}>
+              View All
+            </button>
+          </div>
+
+          {drafts.map((draft) => (
+            <div className="draft-item" key={draft.id}>
+              <img src={draft.image} alt={draft.title} />
+              <div>
+                <strong>{draft.title}</strong>
+                <p>{draft.time}</p>
+              </div>
+              <button onClick={() => handleRemoveDraft(draft.id)}>×</button>
+            </div>
+          ))}
         </div>
       </aside>
     </div>

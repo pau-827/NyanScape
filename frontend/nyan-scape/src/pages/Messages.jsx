@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
 import catImg from "../assets/cat.webp";
 import lunaImg from "../assets/luna.webp";
 import playImg from "../assets/play.jpg";
@@ -9,12 +10,43 @@ import logoImg from "../assets/logo.png";
 function Messages() {
   const navigate = useNavigate();
 
+  const savedProfile =
+    JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+  const [userAvatar, setUserAvatar] = useState(
+    savedProfile.profilePhoto || catImg
+  );
+  const [userName, setUserName] = useState(
+    savedProfile.displayName || "CatLover_23"
+  );
+  const [userHandle, setUserHandle] = useState(
+    savedProfile.username || "@catlover23"
+  );
+
   const [search, setSearch] = useState("");
   const [messageText, setMessageText] = useState("");
   const [selectedChatId, setSelectedChatId] = useState(1);
   const [muted, setMuted] = useState([]);
   const [blocked, setBlocked] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    function syncProfile() {
+      const updatedProfile =
+        JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+      setUserAvatar(updatedProfile.profilePhoto || catImg);
+      setUserName(updatedProfile.displayName || "CatLover_23");
+      setUserHandle(updatedProfile.username || "@catlover23");
+    }
+
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
+
+    return () => {
+      window.removeEventListener("storage", syncProfile);
+    };
+  }, []);
 
   const [chats, setChats] = useState([
     {
@@ -65,8 +97,18 @@ function Messages() {
       unread: 1,
       lastMessage: "Thanks for sharing! What camera do you use?",
       messages: [
-        { id: 1, sender: "them", text: "Your cat photos are amazing!", time: "9:12 AM" },
-        { id: 2, sender: "them", text: "What camera do you use?", time: "9:13 AM" },
+        {
+          id: 1,
+          sender: "them",
+          text: "Your cat photos are amazing!",
+          time: "9:12 AM",
+        },
+        {
+          id: 2,
+          sender: "them",
+          text: "What camera do you use?",
+          time: "9:13 AM",
+        },
       ],
     },
     {
@@ -79,7 +121,12 @@ function Messages() {
       unread: 0,
       lastMessage: "Let's collaborate sometime! 🐾",
       messages: [
-        { id: 1, sender: "them", text: "Let's collaborate sometime! 🐾", time: "8:00 AM" },
+        {
+          id: 1,
+          sender: "them",
+          text: "Let's collaborate sometime! 🐾",
+          time: "8:00 AM",
+        },
       ],
     },
     {
@@ -92,7 +139,12 @@ function Messages() {
       unread: 0,
       lastMessage: "Your photos are amazing! 🔥",
       messages: [
-        { id: 1, sender: "them", text: "Your photos are amazing! 🔥", time: "7:30 AM" },
+        {
+          id: 1,
+          sender: "them",
+          text: "Your photos are amazing! 🔥",
+          time: "7:30 AM",
+        },
       ],
     },
   ]);
@@ -113,6 +165,7 @@ function Messages() {
       sender: "me",
       text: messageText,
       time: "Now",
+      avatar: userAvatar,
     };
 
     setChats(
@@ -135,7 +188,9 @@ function Messages() {
   function selectChat(id) {
     setSelectedChatId(id);
     setChats(
-      chats.map((chat) => (chat.id === id ? { ...chat, unread: 0 } : chat))
+      chats.map((chat) =>
+        chat.id === id ? { ...chat, unread: 0 } : chat
+      )
     );
   }
 
@@ -147,12 +202,19 @@ function Messages() {
       id: Date.now(),
       name,
       handle: `@${name.toLowerCase().replaceAll(" ", "")}`,
-      avatar: "/logo.png",
+      avatar: logoImg,
       status: "Online",
       time: "Now",
       unread: 0,
       lastMessage: "New conversation started.",
-      messages: [{ id: 1, sender: "them", text: "New conversation started.", time: "Now" }],
+      messages: [
+        {
+          id: 1,
+          sender: "them",
+          text: "New conversation started.",
+          time: "Now",
+        },
+      ],
     };
 
     setChats([newChat, ...chats]);
@@ -164,20 +226,26 @@ function Messages() {
 
     setChats(
       chats.map((chat) =>
-        chat.id === selectedChatId ? { ...chat, messages: [], lastMessage: "" } : chat
+        chat.id === selectedChatId
+          ? { ...chat, messages: [], lastMessage: "" }
+          : chat
       )
     );
   }
 
   function toggleMute(id) {
     setMuted((prev) =>
-      prev.includes(id) ? prev.filter((chatId) => chatId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((chatId) => chatId !== id)
+        : [...prev, id]
     );
   }
 
   function toggleBlock(id) {
     setBlocked((prev) =>
-      prev.includes(id) ? prev.filter((chatId) => chatId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((chatId) => chatId !== id)
+        : [...prev, id]
     );
   }
 
@@ -185,27 +253,34 @@ function Messages() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
+    const reader = new FileReader();
 
-    const newMessage = {
-      id: Date.now(),
-      sender: "me",
-      image: imageUrl,
-      time: "Now",
+    reader.onloadend = () => {
+      const imageData = reader.result;
+
+      const newMessage = {
+        id: Date.now(),
+        sender: "me",
+        image: imageData,
+        time: "Now",
+        avatar: userAvatar,
+      };
+
+      setChats(
+        chats.map((chat) =>
+          chat.id === selectedChatId
+            ? {
+                ...chat,
+                messages: [...chat.messages, newMessage],
+                lastMessage: "Sent an image",
+                time: "Now",
+              }
+            : chat
+        )
+      );
     };
 
-    setChats(
-      chats.map((chat) =>
-        chat.id === selectedChatId
-          ? {
-              ...chat,
-              messages: [...chat.messages, newMessage],
-              lastMessage: "Sent an image",
-              time: "Now",
-            }
-          : chat
-      )
-    );
+    reader.readAsDataURL(file);
   }
 
   return (
@@ -219,24 +294,15 @@ function Messages() {
         <button onClick={() => navigate("/fyp")}>🏠 FYP</button>
         <button onClick={() => navigate("/explore")}>🔍 Explore</button>
         <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
+        <button onClick={() => navigate("/fyp")}>🔖 Bookmarks</button>
         <button onClick={() => navigate("/profile")}>👤 My Profile</button>
         <button onClick={() => navigate("/notif")}>🔔 Notifications</button>
         <button className="active">💬 Messages</button>
-        <button onClick={() => navigate("/settings")}>
-  ⚙️ Settings
-</button>
+        <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
 
         <button className="new-message-btn" onClick={startNewMessage}>
           + New Message
         </button>
-
-        <div className="msg-join-card">
-          <img src={logoImg} alt="Mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
-        </div>
       </aside>
 
       <main className="msg-main">
@@ -247,17 +313,28 @@ function Messages() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button onClick={() => navigate("/notifications")}>🔔</button>
-          <img src={catImg} alt="User" />
-          <strong>CatLover_23</strong>
+
+          <button onClick={() => navigate("/notif")}>🔔</button>
+
+          <img
+            src={userAvatar}
+            alt="User"
+            onClick={() => navigate("/profile")}
+          />
+
+          <strong>{userName}</strong>
         </div>
 
         <div className="messages-layout">
           <section className="conversation-list">
             <div className="conversation-header">
               <h2>
-                Messages <span>{chats.reduce((sum, chat) => sum + chat.unread, 0)}</span>
+                Messages{" "}
+                <span>
+                  {chats.reduce((sum, chat) => sum + chat.unread, 0)}
+                </span>
               </h2>
+
               <div>
                 <button onClick={() => alert("Filter opened!")}>⚱</button>
                 <button onClick={startNewMessage}>✎</button>
@@ -276,19 +353,32 @@ function Messages() {
               {filteredChats.map((chat) => (
                 <button
                   key={chat.id}
-                  className={`chat-item ${chat.id === selectedChatId ? "active" : ""}`}
+                  className={`chat-item ${
+                    chat.id === selectedChatId ? "active" : ""
+                  }`}
                   onClick={() => selectChat(chat.id)}
                 >
                   <img src={chat.avatar} alt={chat.name} />
+
                   <div>
                     <strong>
-                      {chat.name} {chat.status === "Online" && <span className="online-dot"></span>}
+                      {chat.name}{" "}
+                      {chat.status === "Online" && (
+                        <span className="online-dot"></span>
+                      )}
                     </strong>
                     <p>{chat.lastMessage}</p>
                   </div>
+
                   <small>{chat.time}</small>
-                  {chat.unread > 0 && <span className="unread-count">{chat.unread}</span>}
-                  {muted.includes(chat.id) && <span className="muted">🔕</span>}
+
+                  {chat.unread > 0 && (
+                    <span className="unread-count">{chat.unread}</span>
+                  )}
+
+                  {muted.includes(chat.id) && (
+                    <span className="muted">🔕</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -299,15 +389,22 @@ function Messages() {
               <>
                 <div className="chat-header">
                   <img src={selectedChat.avatar} alt={selectedChat.name} />
+
                   <div>
                     <h3>{selectedChat.name}</h3>
                     <p>{selectedChat.status}</p>
                   </div>
 
                   <div className="chat-actions">
-                    <button onClick={() => alert("Video call started!")}>📹</button>
-                    <button onClick={() => alert("Voice call started!")}>📞</button>
-                    <button onClick={() => alert("Chat info opened!")}>ⓘ</button>
+                    <button onClick={() => alert("Video call started!")}>
+                      📹
+                    </button>
+                    <button onClick={() => alert("Voice call started!")}>
+                      📞
+                    </button>
+                    <button onClick={() => alert("Chat info opened!")}>
+                      ⓘ
+                    </button>
                   </div>
                 </div>
 
@@ -333,6 +430,7 @@ function Messages() {
                         ) : (
                           <p>{message.text}</p>
                         )}
+
                         <span>{message.time}</span>
                       </div>
                     ))
@@ -342,7 +440,12 @@ function Messages() {
                 <div className="chat-input">
                   <label>
                     📎
-                    <input type="file" accept="image/*" onChange={sendImage} hidden />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={sendImage}
+                      hidden
+                    />
                   </label>
 
                   <input
@@ -360,8 +463,14 @@ function Messages() {
                     }}
                   />
 
-                  <button onClick={() => alert("Emoji picker coming soon!")}>😊</button>
-                  <button onClick={sendMessage} disabled={blocked.includes(selectedChat.id)}>
+                  <button onClick={() => alert("Emoji picker coming soon!")}>
+                    😊
+                  </button>
+
+                  <button
+                    onClick={sendMessage}
+                    disabled={blocked.includes(selectedChat.id)}
+                  >
                     ➤
                   </button>
                 </div>
@@ -370,56 +479,84 @@ function Messages() {
           </section>
 
           <aside className="chat-details">
-            <button className="details-menu">•••</button>
+            {selectedChat && (
+              <>
+                <button className="details-menu">•••</button>
 
-            <img src={selectedChat.avatar} alt={selectedChat.name} className="details-avatar" />
-            <h2>{selectedChat.name}</h2>
-            <p>{selectedChat.handle}</p>
-            <span className="status-dot">● {selectedChat.status}</span>
+                <img
+                  src={selectedChat.avatar}
+                  alt={selectedChat.name}
+                  className="details-avatar"
+                />
 
-            <div className="details-actions">
-              <button onClick={() => navigate("/profile")}>👤 Profile</button>
-              <button onClick={() => toggleMute(selectedChat.id)}>
-                {muted.includes(selectedChat.id) ? "🔔 Unmute" : "🔕 Mute"}
-              </button>
-              <button onClick={() => alert("Search in chat coming soon!")}>🔍 Search</button>
-            </div>
+                <h2>{selectedChat.name}</h2>
+                <p>{selectedChat.handle}</p>
+                <span className="status-dot">● {selectedChat.status}</span>
 
-            <div className="shared-media">
-              <div>
-                <h3>Shared Media</h3>
-                <button onClick={() => alert("Showing all media!")}>View all</button>
-              </div>
+                <div className="details-actions">
+                  <button onClick={() => navigate("/profile")}>👤 Profile</button>
 
-              <div className="media-grid">
-                {[catImg, lunaImg, playImg, logoImg].map((img) => (
-                  <img
-                    key={img}
-                    src={img}
-                    alt="Shared"
-                    onClick={() => setSelectedImage(img)}
-                  />
-                ))}
-              </div>
-            </div>
+                  <button onClick={() => toggleMute(selectedChat.id)}>
+                    {muted.includes(selectedChat.id)
+                      ? "🔔 Unmute"
+                      : "🔕 Mute"}
+                  </button>
 
-            <div className="chat-options">
-              <h3>Options</h3>
-              <button onClick={() => alert("Customize chat opened!")}>
-                🎨 Customize Chat
-              </button>
-              <button onClick={clearChat}>🗑 Clear Chat</button>
-              <button onClick={() => toggleBlock(selectedChat.id)}>
-                {blocked.includes(selectedChat.id) ? "✅ Unblock User" : "🚫 Block User"}
-              </button>
-              <button onClick={() => alert("User reported!")}>🚩 Report User</button>
-            </div>
+                  <button onClick={() => alert("Search in chat coming soon!")}>
+                    🔍 Search
+                  </button>
+                </div>
+
+                <div className="shared-media">
+                  <div>
+                    <h3>Shared Media</h3>
+                    <button onClick={() => alert("Showing all media!")}>
+                      View all
+                    </button>
+                  </div>
+
+                  <div className="media-grid">
+                    {[catImg, lunaImg, playImg, logoImg].map((img) => (
+                      <img
+                        key={img}
+                        src={img}
+                        alt="Shared"
+                        onClick={() => setSelectedImage(img)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="chat-options">
+                  <h3>Options</h3>
+
+                  <button onClick={() => alert("Customize chat opened!")}>
+                    🎨 Customize Chat
+                  </button>
+
+                  <button onClick={clearChat}>🗑 Clear Chat</button>
+
+                  <button onClick={() => toggleBlock(selectedChat.id)}>
+                    {blocked.includes(selectedChat.id)
+                      ? "✅ Unblock User"
+                      : "🚫 Block User"}
+                  </button>
+
+                  <button onClick={() => alert("User reported!")}>
+                    🚩 Report User
+                  </button>
+                </div>
+              </>
+            )}
           </aside>
         </div>
       </main>
 
       {selectedImage && (
-        <div className="msg-image-modal" onClick={() => setSelectedImage(null)}>
+        <div
+          className="msg-image-modal"
+          onClick={() => setSelectedImage(null)}
+        >
           <img src={selectedImage} alt="Preview" />
         </div>
       )}

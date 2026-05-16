@@ -1,32 +1,42 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+
 import catImg from "../assets/cat.webp";
-import lunaImg from "../assets/luna.webp";
-import playImg from "../assets/play.jpg";
 import logoImg from "../assets/logo.png";
 
 function Settings() {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState("Account");
-  const [displayName, setDisplayName] = useState("CatLover_23");
-  const [username, setUsername] = useState("@catlover23");
-  const [bio, setBio] = useState(
-    "Cat lover, photographer, and proud cat parent of 2 fur babies 🐾 Sharing daily dose of purrs & paws! 💜"
-  );
-  const [email] = useState("catlover23@email.com");
-  const [profilePhoto, setProfilePhoto] = useState("/cat.webp");
+  const savedProfile = JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
 
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    allowMessages: true,
-    showOnlineStatus: true,
-    privateAccount: false,
-    twoFactor: false,
-    darkMode: false,
-  });
+  const [activeTab, setActiveTab] = useState("Account");
+  const [displayName, setDisplayName] = useState(
+    savedProfile.displayName || "CatLover_23"
+  );
+  const [username, setUsername] = useState(
+    savedProfile.username || "@catlover23"
+  );
+  const [bio, setBio] = useState(
+    savedProfile.bio ||
+      "Cat lover, photographer, and proud cat parent of 2 fur babies. Sharing daily doses of purrs and paws!"
+  );
+  const [email] = useState(savedProfile.email || "catlover23@email.com");
+  const [profilePhoto, setProfilePhoto] = useState(
+    savedProfile.profilePhoto || catImg
+  );
+
+  const [settings, setSettings] = useState(
+    savedProfile.settings || {
+      emailNotifications: true,
+      pushNotifications: true,
+      allowMessages: true,
+      showOnlineStatus: true,
+      privateAccount: false,
+      twoFactor: false,
+      darkMode: false,
+    }
+  );
 
   function toggleSetting(key) {
     setSettings({ ...settings, [key]: !settings[key] });
@@ -36,8 +46,13 @@ function Settings() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setProfilePhoto(imageUrl);
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setProfilePhoto(reader.result);
+    };
+
+    reader.readAsDataURL(file);
   }
 
   function handleSave() {
@@ -50,51 +65,13 @@ function Settings() {
       settings,
     };
 
-    localStorage.setItem("nyanscape_profile_settings", JSON.stringify(profileData));
+    localStorage.setItem("nyanscape_profile", JSON.stringify(profileData));
     alert("Settings saved successfully!");
-  }
-
-  function handleDownloadData() {
-    const data = {
-      displayName,
-      username,
-      bio,
-      email,
-      settings,
-    };
-
-    const file = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(file);
-    link.download = "nyanscape-user-data.json";
-    link.click();
-  }
-
-  function handleDeactivate() {
-    const confirmDeactivate = window.confirm(
-      "Are you sure you want to deactivate your account?"
-    );
-    if (confirmDeactivate) {
-      alert("Account temporarily deactivated for demo.");
-    }
-  }
-
-  function handleDeleteAccount() {
-    const confirmDelete = window.confirm(
-      "This action is permanent. Delete account?"
-    );
-    if (confirmDelete) {
-      alert("Account deleted for demo.");
-    }
   }
 
   function handleLogout() {
     const confirmLogout = window.confirm("Do you want to log out?");
     if (confirmLogout) {
-      alert("Logged out successfully!");
       navigate("/login");
     }
   }
@@ -119,28 +96,17 @@ function Settings() {
         <button className="nav-link" onClick={() => navigate("/fyp")}>🏠 FYP</button>
         <button className="nav-link" onClick={() => navigate("/explore")}>🔍 Explore</button>
         <button className="nav-link" onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button className="nav-link" onClick={() => alert("Bookmarks opened!")}>🔖 Bookmarks</button>
+        <button className="nav-link" onClick={() => navigate("/fyp")}>🔖 Bookmarks</button>
         <button className="nav-link" onClick={() => navigate("/profile")}>👤 My Profile</button>
         <button className="nav-link" onClick={() => navigate("/notif")}>🔔 Notifications</button>
         <button className="nav-link" onClick={() => navigate("/messages")}>💬 Messages</button>
         <button className="nav-link active">⚙️ Settings</button>
-
-        <button className="settings-invite" onClick={() => alert("Invite link copied!")}>
-          🐾 Invite Friends
-        </button>
-
-        <div className="settings-join-card">
-          <img src={logoImg} alt="Mascot" />
-          <h3>Join NyanScape Community!</h3>
-          <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
-        </div>
       </aside>
 
       <main className="settings-main">
         <div className="settings-topbar">
           <input type="text" placeholder="Search cats, users, or tags..." />
-          <button onClick={() => navigate("/notifications")}>🔔</button>
+          <button onClick={() => navigate("/notif")}>🔔</button>
           <img src={profilePhoto} alt="User" />
           <strong>{displayName}</strong>
         </div>
@@ -167,7 +133,7 @@ function Settings() {
             <section className="settings-card">
               <div className="section-title">
                 <h3>Profile Information</h3>
-                <button onClick={handleSave}>Edit Profile</button>
+                <button onClick={handleSave}>Save Profile</button>
               </div>
 
               <div className="profile-settings-row">
@@ -175,7 +141,12 @@ function Settings() {
                   <img src={profilePhoto} alt="Profile" />
                   <label>
                     📷
-                    <input type="file" accept="image/*" hidden onChange={handlePhotoChange} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handlePhotoChange}
+                    />
                   </label>
                 </div>
 
@@ -235,7 +206,7 @@ function Settings() {
               />
 
               <SettingSwitch
-                title="Allow Messages from Others"
+                title="Allow Messages From Others"
                 description="Let other users send you messages."
                 value={settings.allowMessages}
                 onClick={() => toggleSetting("allowMessages")}
@@ -248,50 +219,9 @@ function Settings() {
                 onClick={() => toggleSetting("showOnlineStatus")}
               />
 
-              <div className="select-row">
-                <div>
-                  <strong>Language</strong>
-                  <p>Choose your preferred language.</p>
-                </div>
-                <select>
-                  <option>English</option>
-                  <option>Filipino</option>
-                  <option>Spanish</option>
-                </select>
-              </div>
-
-              <div className="select-row">
-                <div>
-                  <strong>Time Zone</strong>
-                  <p>Choose your time zone.</p>
-                </div>
-                <select>
-                  <option>(GMT+08:00) Manila</option>
-                  <option>(GMT+00:00) London</option>
-                  <option>(GMT-05:00) New York</option>
-                </select>
-              </div>
-            </section>
-
-            <section className="danger-card">
-              <h3>⚠️ Danger Zone</h3>
-              <p>These actions are permanent and cannot be undone.</p>
-
-              <div className="danger-row">
-                <div>
-                  <strong>Delete Account</strong>
-                  <p>Permanently delete your account and all your data.</p>
-                </div>
-                <button onClick={handleDeleteAccount}>Delete Account</button>
-              </div>
-
-              <div className="danger-row">
-                <div>
-                  <strong>Deactivate Account</strong>
-                  <p>Temporarily disable your account.</p>
-                </div>
-                <button onClick={handleDeactivate}>Deactivate</button>
-              </div>
+              <button className="save-settings-btn" onClick={handleSave}>
+                Save Account Settings
+              </button>
             </section>
           </>
         )}
@@ -313,14 +243,6 @@ function Settings() {
               value={settings.showOnlineStatus}
               onClick={() => toggleSetting("showOnlineStatus")}
             />
-
-            <button className="simple-action" onClick={() => alert("Blocked users opened!")}>
-              Blocked Users
-            </button>
-
-            <button className="simple-action" onClick={() => alert("Muted users opened!")}>
-              Muted Users
-            </button>
 
             <button className="save-settings-btn" onClick={handleSave}>
               Save Privacy Settings
@@ -363,18 +285,6 @@ function Settings() {
               onClick={() => toggleSetting("darkMode")}
             />
 
-            <div className="select-row">
-              <div>
-                <strong>Theme Color</strong>
-                <p>Choose your NyanScape accent color.</p>
-              </div>
-              <select>
-                <option>Purple</option>
-                <option>Pink</option>
-                <option>Blue</option>
-              </select>
-            </div>
-
             <button className="save-settings-btn" onClick={handleSave}>
               Save Appearance
             </button>
@@ -384,10 +294,6 @@ function Settings() {
         {activeTab === "General" && (
           <section className="settings-card">
             <h3>General Settings</h3>
-
-            <button className="simple-action" onClick={handleDownloadData}>
-              Download Your Data
-            </button>
 
             <button className="simple-action" onClick={() => alert("Cache cleared!")}>
               Clear App Cache
@@ -412,10 +318,6 @@ function Settings() {
 
             <button className="simple-action" onClick={() => alert("Password change opened!")}>
               Change Password
-            </button>
-
-            <button className="simple-action" onClick={() => alert("Login activity opened!")}>
-              View Login Activity
             </button>
 
             <button className="save-settings-btn" onClick={handleSave}>
@@ -449,15 +351,6 @@ function Settings() {
           <button onClick={() => setActiveTab("Privacy")}>Blocked Users ›</button>
           <button onClick={() => setActiveTab("Privacy")}>Muted Users ›</button>
           <button onClick={() => setActiveTab("Privacy")}>Who Can See My Posts ›</button>
-          <button onClick={() => setActiveTab("Privacy")}>Who Can Comment ›</button>
-        </div>
-
-        <div className="settings-right-card">
-          <h3>❔ Help & Support</h3>
-          <button onClick={() => alert("Help Center opened!")}>Help Center ›</button>
-          <button onClick={() => alert("Contact support opened!")}>Contact Support ›</button>
-          <button onClick={() => alert("Privacy Policy opened!")}>Privacy Policy ›</button>
-          <button onClick={() => alert("Terms opened!")}>Terms of Service ›</button>
         </div>
 
         <button className="logout-btn" onClick={handleLogout}>

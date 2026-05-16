@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
@@ -9,6 +9,12 @@ import logoImg from "../assets/logo.png";
 
 function Home() {
   const navigate = useNavigate();
+
+  const savedProfile = JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+  const [userAvatar, setUserAvatar] = useState(savedProfile.profilePhoto || catImg);
+  const [userName, setUserName] = useState(savedProfile.displayName || "CatLover_23");
+  const [userHandle, setUserHandle] = useState(savedProfile.username || "@catlover23");
 
   const defaultPosts = [
     {
@@ -87,6 +93,24 @@ function Home() {
   const [openComments, setOpenComments] = useState(null);
   const [commentText, setCommentText] = useState("");
 
+  useEffect(() => {
+    function syncProfile() {
+      const updatedProfile =
+        JSON.parse(localStorage.getItem("nyanscape_profile")) || {};
+
+      setUserAvatar(updatedProfile.profilePhoto || catImg);
+      setUserName(updatedProfile.displayName || "CatLover_23");
+      setUserHandle(updatedProfile.username || "@catlover23");
+    }
+
+    syncProfile();
+    window.addEventListener("storage", syncProfile);
+
+    return () => {
+      window.removeEventListener("storage", syncProfile);
+    };
+  }, []);
+
   function savePosts(updatedPosts) {
     setPosts(updatedPosts);
     localStorage.setItem("nyanscape_posts", JSON.stringify(updatedPosts));
@@ -99,7 +123,7 @@ function Home() {
     const newNotification = {
       id: Date.now(),
       type,
-      user: "Someone",
+      user: userName,
       message:
         type === "likes"
           ? "liked your post."
@@ -108,7 +132,7 @@ function Home() {
           : "interacted with your post.",
       detail,
       time: "Just now",
-      avatar: catImg,
+      avatar: userAvatar,
       image: post.image || catImg,
       unread: true,
     };
@@ -174,9 +198,10 @@ function Home() {
 
     const newComment = {
       id: Date.now(),
-      user: "You",
+      user: userName,
       text: commentText,
       time: "Just now",
+      avatar: userAvatar,
     };
 
     const updatedPosts = posts.map((post) =>
@@ -225,8 +250,8 @@ function Home() {
 
     const newPost = {
       id: `post-${Date.now()}`,
-      username: "You",
-      handle: "@you",
+      username: userName,
+      handle: userHandle,
       time: "Just now",
       title: newCaption,
       caption: newCaption,
@@ -323,7 +348,12 @@ function Home() {
             🔔
           </span>
 
-          <img src={catImg} alt="User" className="top-avatar" />
+          <img
+            src={userAvatar}
+            alt="User"
+            className="top-avatar"
+            onClick={() => navigate("/profile")}
+          />
         </div>
 
         <section className="feed-header">
@@ -371,7 +401,16 @@ function Home() {
               <div className="post-menu">•••</div>
 
               <div className="post-user">
-                <img src={post.image} alt={post.username} className="user-avatar" />
+                <img
+                  src={
+                    post.username === userName || post.handle === userHandle
+                      ? userAvatar
+                      : post.image
+                  }
+                  alt={post.username}
+                  className="user-avatar"
+                />
+
                 <div>
                   <h3>{post.username}</h3>
                   <p>
@@ -416,7 +455,7 @@ function Home() {
               {openComments === post.id && (
                 <div className="fb-comments">
                   <div className="fb-comment-input">
-                    <img src={catImg} alt="User" />
+                    <img src={userAvatar} alt="User" />
 
                     <input
                       type="text"
