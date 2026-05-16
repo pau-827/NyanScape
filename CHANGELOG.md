@@ -115,3 +115,8 @@ All notable changes to this project will be documented in this file.
  ### Changed
 
 - `[Muit]` - Extracted and removed the side navigation bar from all pages and modified a one for all
+
+### Added
+
+- `[Muit]` - Created README markdown file for the whole project
+- `[Muit]` - Added more deployment process screenshots
