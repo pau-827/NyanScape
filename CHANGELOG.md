@@ -98,3 +98,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - `[Muit]` - Updated GitHub Actions workflow to use backend/ directory
+
+### Removed
+
+- `[Muit]` - Removed duplicate Azure workflow file
