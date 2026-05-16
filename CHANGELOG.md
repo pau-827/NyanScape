@@ -94,3 +94,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `[Muit]` - Prepared backend for Azure deployment
+
+### Fixed
+
+- `[Muit]` - Updated GitHub Actions workflow to use backend/ directory
