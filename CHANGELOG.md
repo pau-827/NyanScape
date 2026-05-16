@@ -90,3 +90,7 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Used Supabase client directly to fixe auth pages' route
 - `[Muit]` - Connected Home and Createpost to backend
 - `[Muit]` - Connected Profile, Explore, Settings to real Supabase and backend data
+
+### Added
+
+- `[Muit]` - Prepared backend for Azure deployment
