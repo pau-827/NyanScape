@@ -27,6 +27,14 @@ NyanScape follows a multi-cloud deployment architecture:
 
 ---
 
+### Azure Architecture Diagram
+
+---
+
+![Diagram](diagram/azure-architecture.png)
+
+---
+
 ## 🚀 Features
 
 ### Implemented Features
@@ -130,11 +138,18 @@ frontend/nyan-scape/
 
 ```env
 SUPABASE_URL=
-SUPABASE_KEY=
+SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 AZURE_STORAGE_CONNECTION_STRING=
 AZURE_STORAGE_CONTAINER=
-SECRET_KEY=
+```
+
+### Frontend `.env`
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_API_URL=
 ```
 
 ---
@@ -259,7 +274,7 @@ Developer Push → GitHub Repository
 Deployment screenshots and cloud setup documentation are available in:
 
 ```txt
-deployment/screenshots/
+deployment/README.md
 ```
 
 This includes:
@@ -293,12 +308,12 @@ NyanScape implements two cloud optimizations:
 
 Planned future enhancements for NyanScape include:
 
-- Integration with Azure AI Vision for automatic image analysis
-- AI-generated hashtags based on uploaded cat images
-- Smart content tagging and categorization
-- Improved recommendation and discovery system
-- Enhanced real-time notifications
-- Full messaging functionality
+- Azure AI Vision integration
+- Automatic AI-generated hashtags
+- Smart image categorization
+- Enhanced recommendation system
+- Improved real-time messaging
+- Expanded social features
 
 ## 👥 Team
 
@@ -321,4 +336,4 @@ Planned future enhancements for NyanScape include:
 
 This project is intended for academic purposes only.
 
-All Rights Reserved © Due it Squad
+All Rights Reserved © Due-it Squad

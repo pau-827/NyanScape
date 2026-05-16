@@ -120,3 +120,4 @@ All notable changes to this project will be documented in this file.
 
 - `[Muit]` - Created README markdown file for the whole project
 - `[Muit]` - Added more deployment process screenshots
+- `[Muit]` - Added deployment instructions in README
