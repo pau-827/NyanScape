@@ -1,147 +1,67 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { getPosts, deletePost } from "../lib/api";
 import "../App.css";
-import catImg from "../assets/cat.webp";
-import lunaImg from "../assets/luna.webp";
-import playImg from "../assets/play.jpg";
 import logoImg from "../assets/logo.png";
 import cover from "../assets/cover.jpg";
 
-function Profile() {
+function Profile({ session }) {
   const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState("posts");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [profileName, setProfileName] = useState("CatLover_23");
-  const [bio, setBio] = useState(
-    "Cat lover, photographer, and proud cat parent of 2 fur babies 🐾 Sharing daily dose of purrs & paws! 💜"
-  );
+  const [profile, setProfile] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const defaultPosts = [
-    {
-      id: 1,
-      username: "CatLover_23",
-      title: "Lazy Sunday ☀️",
-      image: catImg,
-      likes: 256,
-      comments: 18,
-      bookmarked: false,
-      liked: false,
-      draft: false,
-    },
-    {
-      id: 2,
-      username: "CatLover_23",
-      title: "Playtime is the best time! 🧶",
-      image: playImg,
-      likes: 312,
-      comments: 24,
-      bookmarked: true,
-      liked: true,
-      draft: false,
-    },
-    {
-      id: 3,
-      username: "CatLover_23",
-      title: "Watching the world go by 🌎",
-      image: lunaImg,
-      likes: 198,
-      comments: 12,
-      bookmarked: false,
-      liked: false,
-      draft: false,
-    },
-  ];
+  useEffect(() => {
+    fetchProfile();
+    fetchMyPosts();
+  }, [session]);
 
-  const storedPosts = JSON.parse(localStorage.getItem("nyanscape_posts")) || [];
-
-  const userPosts = useMemo(() => {
-    const createdPosts = storedPosts.filter(
-      (post) => post.username === "You" || post.username === "CatLover_23"
-    );
-
-    return [...createdPosts, ...defaultPosts];
-  }, [storedPosts]);
-
-  const [posts, setPosts] = useState(userPosts);
-
-  function handleLike(id) {
-    setPosts(
-      posts.map((post) =>
-        post.id === id
-          ? {
-              ...post,
-              liked: !post.liked,
-              likes: post.liked ? post.likes - 1 : post.likes + 1,
-            }
-          : post
-      )
-    );
+  async function fetchProfile() {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+    if (!error) setProfile(data);
   }
 
-  function handleSave(id) {
-    setPosts(
-      posts.map((post) =>
-        post.id === id
-          ? { ...post, bookmarked: !post.bookmarked }
-          : post
-      )
-    );
+  async function fetchMyPosts() {
+    try {
+      const res = await getPosts();
+      const mine = res.data.filter((p) => p.user_id === session.user.id);
+      setPosts(mine);
+    } catch (err) {
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleComment(id) {
-    const comment = prompt("Write a comment:");
-    if (!comment) return;
-
-    setPosts(
-      posts.map((post) =>
-        post.id === id ? { ...post, comments: post.comments + 1 } : post
-      )
-    );
-
-    alert("Comment added!");
+  async function handleDeletePost(id) {
+    if (!window.confirm("Delete this post?")) return;
+    try {
+      await deletePost(id);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
   }
 
-  function handleShare(id) {
-    navigator.clipboard.writeText(`${window.location.origin}/post/${id}`);
-    alert("Post link copied!");
+  async function handleEditProfile() {
+    const newName = window.prompt("Enter your display name:", profile?.username || "");
+    const newBio = window.prompt("Enter your bio:", profile?.bio || "");
+    if (!newName) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ username: newName, bio: newBio })
+      .eq("id", session.user.id);
+    if (!error) setProfile((prev) => ({ ...prev, username: newName, bio: newBio }));
   }
 
-  function handleEditProfile() {
-    const newName = prompt("Enter your display name:", profileName);
-    const newBio = prompt("Enter your bio:", bio);
-
-    if (newName) setProfileName(newName);
-    if (newBio) setBio(newBio);
-  }
-
-  function handleEditCover() {
-    alert("Cover photo editing is ready for future upload feature.");
-  }
-
-  function handleEditAvatar() {
-    alert("Profile photo editing is ready for future upload feature.");
-  }
-
-  function handleDeletePost(id) {
-    const confirmDelete = confirm("Delete this post?");
-    if (!confirmDelete) return;
-
-    const updatedPosts = posts.filter((post) => post.id !== id);
-    setPosts(updatedPosts);
-
-    const updatedStoredPosts = storedPosts.filter((post) => post.id !== id);
-    localStorage.setItem("nyanscape_posts", JSON.stringify(updatedStoredPosts));
-  }
-
-  const displayedPosts =
-    activeTab === "posts"
-      ? posts.filter((post) => !post.draft)
-      : activeTab === "saved"
-      ? posts.filter((post) => post.bookmarked)
-      : activeTab === "liked"
-      ? posts.filter((post) => post.liked)
-      : posts.filter((post) => post.draft);
+  const displayedPosts = activeTab === "posts" ? posts : [];
 
   return (
     <div className="profile-page">
@@ -150,142 +70,78 @@ function Profile() {
           <img src={logoImg} alt="NyanScape Logo" />
           <h1>NyanScape</h1>
         </div>
-
         <button onClick={() => navigate("/fyp")}>🏠 FYP</button>
         <button onClick={() => navigate("/explore")}>🔍 Explore</button>
         <button onClick={() => navigate("/create-post")}>➕ Create Post</button>
-        <button onClick={() => setActiveTab("saved")}>🔖 Bookmarks</button>
         <button className="active">👤 My Profile</button>
-        <button onClick={() => alert("You have 3 notifications!")}>
-          🔔 Notifications
-        </button>
-        <button onClick={() => alert("Messages coming soon!")}>💬 Messages</button>
-        <button onClick={() => alert("Settings coming soon!")}>⚙️ Settings</button>
-
-        <button className="invite-btn" onClick={() => alert("Invite link copied!")}>
-          🐾 Invite Friends
-        </button>
-
+        <button onClick={() => navigate("/notifications")}>🔔 Notifications</button>
+        <button onClick={() => navigate("/messages")}>💬 Messages</button>
+        <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
         <div className="profile-join-card">
-          <img src={logoImg}alt="Mascot" />
+          <img src={logoImg} alt="Mascot" />
           <h3>Join NyanScape Community!</h3>
           <p>Share your cat stories, photos, and moments with fellow cat lovers!</p>
-          <button onClick={() => alert("Invite link copied!")}>Invite Friends</button>
+          <button onClick={async () => { await supabase.auth.signOut(); navigate("/login"); }}>Logout</button>
         </div>
       </aside>
 
       <main className="profile-main">
         <div className="profile-topbar">
           <input type="text" placeholder="Search cats, users, or tags..." />
-          <button onClick={() => alert("Notifications opened!")}>🔔</button>
-          <img src={catImg} alt="User" />
-          <strong>{profileName}</strong>
+          <strong>{profile?.username || "..."}</strong>
         </div>
 
         <section className="profile-card">
           <div className="cover-photo">
             <img src={cover} alt="Cover" />
-            <button onClick={handleEditCover}>📷 Edit Cover</button>
           </div>
 
           <div className="profile-info">
             <div className="profile-avatar-wrap">
-              <img src={catImg} alt="Profile" className="profile-avatar" />
-              <button onClick={handleEditAvatar}>📷</button>
+              <div className="profile-avatar-placeholder">🐱</div>
             </div>
-
             <div className="profile-text">
-              <h2>{profileName}</h2>
-              <p className="handle">@catlover23</p>
+              <h2>{profile?.username || "Loading..."}</h2>
+              <p className="handle">@{profile?.username?.toLowerCase().replace(/\s/g, "") || ""}</p>
               <span className="badge">Cat Enthusiast 🐱</span>
-              <p className="bio">{bio}</p>
-
+              <p className="bio">{profile?.bio || "No bio yet."}</p>
               <div className="stats">
-                <div>
-                  <strong>{posts.length}</strong>
-                  <span>Posts</span>
-                </div>
-                <div>
-                  <strong>2.4K</strong>
-                  <span>Followers</span>
-                </div>
-                <div>
-                  <strong>560</strong>
-                  <span>Following</span>
-                </div>
-                <div>
-                  <strong>
-                    {posts.reduce((total, post) => total + post.likes, 0)}
-                  </strong>
-                  <span>Likes</span>
-                </div>
+                <div><strong>{posts.length}</strong><span>Posts</span></div>
+                <div><strong>0</strong><span>Followers</span></div>
+                <div><strong>0</strong><span>Following</span></div>
               </div>
             </div>
-
             <button className="edit-profile-btn" onClick={handleEditProfile}>
               👤 Edit Profile
             </button>
           </div>
 
           <div className="profile-tabs">
-            <button
-              className={activeTab === "posts" ? "active" : ""}
-              onClick={() => setActiveTab("posts")}
-            >
-              ▦ Posts
-            </button>
-            <button
-              className={activeTab === "saved" ? "active" : ""}
-              onClick={() => setActiveTab("saved")}
-            >
-              🔖 Saved
-            </button>
-            <button
-              className={activeTab === "liked" ? "active" : ""}
-              onClick={() => setActiveTab("liked")}
-            >
-              ♡ Liked
-            </button>
-            <button
-              className={activeTab === "drafts" ? "active" : ""}
-              onClick={() => setActiveTab("drafts")}
-            >
-              📄 Drafts
-            </button>
+            <button className={activeTab === "posts" ? "active" : ""} onClick={() => setActiveTab("posts")}>▦ Posts</button>
           </div>
         </section>
 
         <section className="profile-post-grid">
-          {displayedPosts.length === 0 ? (
+          {loading ? (
+            <div className="profile-empty"><h3>Loading... 🐱</h3></div>
+          ) : displayedPosts.length === 0 ? (
             <div className="profile-empty">
-              <h3>No posts here yet 🐾</h3>
-              <p>Create, like, or save posts to see them here.</p>
+              <h3>No posts yet 🐾</h3>
+              <p>Share your first cat moment!</p>
               <button onClick={() => navigate("/create-post")}>Create Post</button>
             </div>
           ) : (
             displayedPosts.map((post) => (
               <article className="profile-post-card" key={post.id}>
                 <img
-                  src={post.image}
-                  alt={post.title}
-                  onClick={() => setSelectedImage(post.image)}
+                  src={post.image_url}
+                  alt={post.caption}
+                  onClick={() => setSelectedImage(post.image_url)}
                 />
-
                 <div className="profile-post-content">
-                  <h3>{post.title}</h3>
-
+                  <h3>{post.caption}</h3>
                   <div className="profile-post-actions">
-                    <button onClick={() => handleLike(post.id)}>
-                      {post.liked ? "❤️" : "♡"} {post.likes}
-                    </button>
-                    <button onClick={() => handleComment(post.id)}>
-                      💬 {post.comments}
-                    </button>
-                    <button onClick={() => handleShare(post.id)}>↗ Share</button>
-                    <button onClick={() => handleSave(post.id)}>
-                      {post.bookmarked ? "🔖" : "🔲"}
-                    </button>
-                    <button onClick={() => handleDeletePost(post.id)}>•••</button>
+                    <button onClick={() => handleDeletePost(post.id)}>🗑️ Delete</button>
                   </div>
                 </div>
               </article>
@@ -297,54 +153,14 @@ function Profile() {
       <aside className="profile-right">
         <div className="right-profile-card">
           <h3>👤 About Me</h3>
-          <p>📍 Cat City, Meowland</p>
-          <p>📅 Joined March 2024</p>
-          <p>🎂 Born on April 12</p>
-          <p>🐾 2 Fur Babies: Luna & Milo</p>
+          <p>📅 Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "..."}</p>
+          <p>📧 {session.user.email}</p>
           <button onClick={handleEditProfile}>Edit Details</button>
         </div>
-
-        <div className="right-profile-card">
-          <div className="right-title">
-            <h3>🐾 My Fur Babies</h3>
-            <button onClick={() => alert("Showing all fur babies!")}>View all</button>
-          </div>
-
-          <div className="fur-babies">
-            <div>
-              <img src={lunaImg} alt="Luna" />
-              <strong>Luna 🐱</strong>
-              <p>2 years old</p>
-            </div>
-
-            <div>
-              <img src={catImg} alt="Milo" />
-              <strong>Milo 🐱</strong>
-              <p>1 year old</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="right-profile-card">
-          <div className="right-title">
-            <h3># Top Tags</h3>
-            <button onClick={() => alert("Showing all tags!")}>View all</button>
-          </div>
-
-          <div className="tag-list">
-            <span>#Caturday<br />234 posts</span>
-            <span>#CatLife<br />189 posts</span>
-            <span>#NyanScape<br />156 posts</span>
-            <span>#CatLover<br />98 posts</span>
-          </div>
-        </div>
-
-        <div className="right-profile-card progress-card">
-          <h3># Profile Progress</h3>
-          <div className="progress-circle">80%</div>
-          <strong>Great job!</strong>
-          <p>Complete your profile to get more followers.</p>
-          <button onClick={handleEditProfile}>Complete Now</button>
+        <div className="right-profile-card quote-card">
+          <h3>Daily Purrspiration</h3>
+          <p>"Time spent with cats is never wasted."</p>
+          <span>– Sigmund Freud</span>
         </div>
       </aside>
 
