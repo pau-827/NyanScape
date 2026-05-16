@@ -121,3 +121,10 @@ All notable changes to this project will be documented in this file.
 - `[Muit]` - Created README markdown file for the whole project
 - `[Muit]` - Added more deployment process screenshots
 - `[Muit]` - Added deployment instructions in README
+
+- `[Sanglay]` - Initial Report Documentation of Cost Estimate
+
+### Changed
+
+- `[Panliboton]` - Updated Cost Estimate report
+- `[Muit]` - Finalized Cost Estimate report
