@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPosts, likePost, unlikePost, getLikes, getComments, addComment, deletePost } from "../lib/api";
+import { getPosts, likePost, unlikePost, getLikes, getComments, addComment, deletePost, getProfile } from "../lib/api";
 import Sidebar from "../components/Sidebar";
+// import RightPanel from "../components/RightPanel";
 import "../App.css";
 
 function Home({ session }) {
@@ -16,12 +17,15 @@ function Home({ session }) {
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [showComments, setShowComments] = useState({});
+  const [postAvatars, setPostAvatars] = useState({});
 
   async function fetchPosts() {
     try {
       setLoading(true);
       const res = await getPosts();
       setPosts(res.data);
+
+      // Fetch like counts
       const likeData = {};
       await Promise.all(res.data.map(async (post) => {
         try {
@@ -30,6 +34,18 @@ function Home({ session }) {
         } catch { likeData[post.id] = 0; }
       }));
       setLikeCounts(likeData);
+
+      // Fetch avatars for each unique user
+      const uniqueUserIds = [...new Set(res.data.map(p => p.user_id))];
+      const avatarData = {};
+      await Promise.all(uniqueUserIds.map(async (userId) => {
+        try {
+          const r = await getProfile(userId);
+          if (r.data.avatar_url) avatarData[userId] = r.data.avatar_url;
+        } catch { /* no avatar */ }
+      }));
+      setPostAvatars(avatarData);
+
     } catch (err) {
       console.error("Failed to fetch posts:", err);
     } finally {
@@ -98,8 +114,8 @@ function Home({ session }) {
       <Sidebar />
       <main className="page-main feed">
         <div className="top-bar">
-          <input type="text" placeholder="Search posts or users..." value={search}
-            onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search posts or users..."
+            value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
         <section className="feed-header">
@@ -125,15 +141,26 @@ function Home({ session }) {
           filteredPosts.map((post) => (
             <article className="post-card" key={post.id}>
               <div className="post-user">
-                <div className="user-avatar-placeholder">🐱</div>
+                <div className="user-avatar-placeholder">
+                  {postAvatars[post.user_id] ? (
+                    <img
+                      src={postAvatars[post.user_id]}
+                      alt="avatar"
+                      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                    />
+                  ) : "🐱"}
+                </div>
                 <div>
                   <h3>{post.profiles?.username || "Unknown"}</h3>
                   <p>{new Date(post.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
+
               <p className="post-title">{post.caption}</p>
+
               <img src={post.image_url} alt="Cat post" className="post-image"
                 onClick={() => setSelectedImage(post.image_url)} />
+
               <div className="post-actions">
                 <button onClick={() => handleLike(post.id)}>
                   {likedPosts[post.id] ? "❤️" : "🤍"} {likeCounts[post.id] || 0}
@@ -146,6 +173,7 @@ function Home({ session }) {
                   <button onClick={() => handleDelete(post.id)}>🗑️</button>
                 )}
               </div>
+
               {showComments[post.id] && (
                 <div className="comments">
                   {(comments[post.id] || []).map((c) => (

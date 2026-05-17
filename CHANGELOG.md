@@ -145,3 +145,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - `[Muit]` - Fixed profile bio saving issues to Supabase
+- `[Muit]` - Reflected user profile photo in FYP
+
+### Changed
+
+- `[Muit]` - Updated temporary logo to the official logo in navbar and auth pages

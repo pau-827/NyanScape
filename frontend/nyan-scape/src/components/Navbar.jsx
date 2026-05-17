@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import nyanLogo from '../assets/nyan.png'
+import nyanLogo from '../assets/logo.png'
 
 function Navbar({ session }) {
   const navigate = useNavigate()
